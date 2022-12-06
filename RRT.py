@@ -29,9 +29,8 @@ def closest_ver(S, tree, ver, radius=float('inf')):
             nearest_ver, ver_id = V, id
     return nearest_ver, ver_id
 
-def RRT(N_iter, start, goal, area):
+def RRT(N_iter, start, goal, area, S):
     T = tree(start, goal)
-    S = Scenario(area[0], area[1])
     for n in range(N_iter):
         posx, posy = rand_ver(area)
         obj = shapely.geometry.Point(posx, posy)
@@ -74,3 +73,5 @@ class tree:
 
     def plotting(self):
         pass
+
+

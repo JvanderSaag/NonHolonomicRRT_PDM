@@ -1,5 +1,6 @@
 import ObstacleCreator_class, Scenario_class
 from shapely.geometry import Point
+from RRT import RRT
 # Create obstacles
 ObstacleCreator = ObstacleCreator_class.ObstacleCreator()
 
@@ -11,4 +12,5 @@ start, goal = Point(1, 1), Point (19, 19)
 simple_Scenario = Scenario_class.Scenario(env_width=20, env_height=20)
 simple_Scenario.set_obstacles(obstacles)
 simple_Scenario.set_start_goal(start, goal)
+RRT(100, (1,1), (19,19), (20,20), simple_Scenario)
 simple_Scenario.plot_scenario()
