@@ -56,8 +56,14 @@ class Scenario:
             ax.add_patch(matplotlib.patches.Polygon(obstacle.exterior.coords, color="grey"))
             # plt.plot(*obstacle.exterior.xy)
         
-        # Draw boundary if it exists
+        # Draw start and goal
+        plt.scatter(self.start.x, self.start.y, s=50, c='g', marker='o', label='Start')
+        plt.scatter(self.goal.x, self.goal.y, s=60, c='r', marker='*', label='Goal')
+
+        # Draw boundary, if it exists
         if self.boundary is not None:
             plt.plot(*self.boundary.xy, color="k")
+        
+        plt.legend()
         plt.show()
         pass
