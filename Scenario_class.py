@@ -76,7 +76,7 @@ class Scenario:
         
         # Draw path, if it exists
         for path in self.path:
-            plt.plot(*path.xy)
+            plt.plot(*path.xy, c='tab:blue', alpha=0.4)
 
         plt.legend()
         plt.show()
