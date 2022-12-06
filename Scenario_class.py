@@ -4,6 +4,7 @@
 
 import shapely.geometry
 import matplotlib.pyplot as plt
+import matplotlib.patches
 
 class Scenario:
     def __init__(self, env_width, env_height, boundary_collision=False):
@@ -44,16 +45,19 @@ class Scenario:
 
 
     def plot_scenario(self): # Plot the scenario in matplotlib
+        fig, ax = plt.subplots()
+
         # Set boundaries for drawing scenario
-        plt.xlim([0,  self.width])
+        plt.xlim([0, self.width])
         plt.ylim([0, self.height])
 
         # Draw obstacles
         for obstacle in self.obstacles:
-            plt.plot(*obstacle.exterior.xy)
+            ax.add_patch(matplotlib.patches.Polygon(obstacle.exterior.coords, color="grey"))
+            # plt.plot(*obstacle.exterior.xy)
         
         # Draw boundary if it exists
         if self.boundary is not None:
-            plt.plot(*self.boundary.xy)
+            plt.plot(*self.boundary.xy, color="k")
         plt.show()
         pass

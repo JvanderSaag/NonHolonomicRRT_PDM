@@ -3,7 +3,7 @@ from shapely.geometry import Point
 # Create obstacles
 ObstacleCreator = ObstacleCreator_class.ObstacleCreator()
 
-ObstacleCreator.create_rectangle(5, 5, (5, 5))
+ObstacleCreator.create_rectangle(10, 10, (5, 5))
 
 obstacles = ObstacleCreator.return_obstacles()
 start, goal = Point(1, 1), Point (15, 15)
