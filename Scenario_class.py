@@ -12,12 +12,17 @@ class Scenario:
         self.width = env_width
         self.height = env_height
 
-        if boundary_collision: # If boundary collision is set to true, bbox is created.
+        # Initalise attributes as none, updated with other functions
+        self.obstacles, self.goal, self.start = [], None, None 
+
+        # If boundary collision is set to true, bbox is created.
+        if boundary_collision: 
             bbox_coords = [(0, 0), (0, self.width), (self.width, self.height), (self.width, 0), (0, 0)]
             self.boundary = shapely.geometry.LineString(bbox_coords)
         else:
             self.boundary = None # Else None boundary
         pass
+
 
     def set_start_goal(self, start, goal):
         # Set start and goal, and assert datatype is correct
@@ -42,7 +47,7 @@ class Scenario:
             return True # Returns True if no collisions
         except AttributeError: # In case object does not have geom_type attribute (not shapely object)
             print("The object is not a shapely object (Point, LineString, Polygon etc.)")
-
+        pass
 
     def plot_scenario(self): # Plot the scenario in matplotlib
         fig, ax = plt.subplots()
@@ -56,8 +61,15 @@ class Scenario:
             ax.add_patch(matplotlib.patches.Polygon(obstacle.exterior.coords, color="grey"))
             # plt.plot(*obstacle.exterior.xy)
         
-        # Draw boundary if it exists
+        # Draw start and goal
+        if self.start is not None and self.goal is not None:
+            plt.scatter(self.start.x, self.start.y, s=50, c='g', marker='o', label='Start')
+            plt.scatter(self.goal.x, self.goal.y, s=60, c='r', marker='*', label='Goal')
+
+        # Draw boundary, if it exists
         if self.boundary is not None:
             plt.plot(*self.boundary.xy, color="k")
+        
+        plt.legend()
         plt.show()
         pass

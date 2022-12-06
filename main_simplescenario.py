@@ -6,7 +6,7 @@ ObstacleCreator = ObstacleCreator_class.ObstacleCreator()
 ObstacleCreator.create_rectangle(10, 10, (5, 5))
 
 obstacles = ObstacleCreator.return_obstacles()
-start, goal = Point(1, 1), Point (15, 15)
+start, goal = Point(1, 1), Point (19, 19)
 
 simple_Scenario = Scenario_class.Scenario(env_width=20, env_height=20)
 simple_Scenario.set_obstacles(obstacles)
