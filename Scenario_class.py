@@ -13,7 +13,7 @@ class Scenario:
         self.height = env_height
 
         # Initalise attributes as none, updated with other functions
-        self.obstacles, self.goal, self.start = [], None, None 
+        self.obstacles, self.goal, self.start, self.path = [], None, None, []
 
         # If boundary collision is set to true, bbox is created.
         if boundary_collision: 
@@ -37,6 +37,10 @@ class Scenario:
         self.obstacles = obstacles # define obstacles as list of shapely objects
         pass
     
+    def set_path(self, path):
+        # Include path from motion planner into scenario class
+        self.path = path
+        pass
 
     def collision_free(self, object): # Check if given path/points object from RRT is collision_free
         try: # Object can be any shapely object (point, line or polygon)
@@ -70,6 +74,10 @@ class Scenario:
         if self.boundary is not None:
             plt.plot(*self.boundary.xy, color="k")
         
+        # Draw path, if it exists
+        for path in self.path:
+            plt.plot(*path.xy)
+
         plt.legend()
         plt.show()
         pass
