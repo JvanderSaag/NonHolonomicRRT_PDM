@@ -36,7 +36,7 @@ class Scenario:
         assert all(isinstance(x, shapely.geometry.Polygon) for x in obstacles), "Obstacles are not polygons!" 
         self.obstacles = obstacles # define obstacles as list of shapely objects
         pass
-
+    
 
     def collision_free(self, object): # Check if given path/points object from RRT is collision_free
         try: # Object can be any shapely object (point, line or polygon)
