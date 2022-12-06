@@ -12,7 +12,7 @@ class ObstacleCreator:
 
     def create_rectangle(self, width, height, left_corner):
         x, y = left_corner
-        Polygon = shapely.geometry.Polygon([(x, y),(x, y + height), (x + height, y + height), (x + height, y), (x, y)])
+        Polygon = shapely.geometry.Polygon([(x, y),(x, y + height), (x + width, y + height), (x + width, y)])
         self.polygons.append(Polygon)
         return Polygon
 
