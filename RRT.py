@@ -12,7 +12,7 @@ class TreeNode: # Tree Node class that RRT uses
 
 def RRT(N_iter, scenario, dist_tolerance=0.5, plot_all_trees=False): # RRT using TreeNodes
     start_Node, goal_Node = TreeNode(scenario.start), TreeNode(scenario.goal)
-
+    
     for n in range(N_iter):
         sampled_point = Point(rand_coords(scenario.width, scenario.height))
         sampled_Node = TreeNode(sampled_point)
