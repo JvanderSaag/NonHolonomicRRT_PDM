@@ -48,6 +48,8 @@ class Scenario:
             for obstacle in self.obstacles:
                 if object.intersects(obstacle): # Check collisions with obstacles in scenario
                     return False # Returns False if collision occurs (not collision free)
+            if object.intersects(self.boundary): # Check collisions with the boundary in scenario
+                return False # Returns False if collision occurs (not collision free)
             return True # Returns True if no collisions
         except AttributeError: # In case object does not have geom_type attribute (not shapely object)
             print("The object is not a shapely object (Point, LineString, Polygon etc.)")
@@ -77,6 +79,8 @@ class Scenario:
         # Draw path, if it exists
         for path in self.path:
             plt.plot(*path.xy, c='tab:blue', alpha=0.4)
+            # for line in path:
+            #     plt.plot(*line.xy, c='tab:blue', alpha=0.4)
 
         plt.legend()
         plt.show()
