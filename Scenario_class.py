@@ -26,21 +26,23 @@ class Scenario:
 
     def set_start_goal(self, start, goal):
         # Set start and goal, and assert datatype is correct
-        assert isinstance(start, shapely.geometry.Point) and isinstance(goal, shapely.geometry.Point), "Start and goal are not defined by points!" 
+        assert isinstance(start, shapely.geometry.Point) and isinstance(goal, shapely.geometry.Point), "AssertError: Start and goal are not defined by points!" 
         self.start, self.goal = start, goal
         pass
 
 
     def set_obstacles(self, obstacles):
         # Set list of obstacles, and assert datatype is correct
-        assert all(isinstance(x, shapely.geometry.Polygon) for x in obstacles), "Obstacles are not polygons!" 
+        assert all(isinstance(x, shapely.geometry.Polygon) for x in obstacles), "AssertError: Obstacles are not polygons!" 
         self.obstacles = obstacles # define obstacles as list of shapely objects
         pass
     
+
     def set_path(self, path):
         # Include path from motion planner into scenario class
         self.path = path
         pass
+
 
     def collision_free(self, object): # Check if given path/points object from RRT is collision_free
         try: # Object can be any shapely object (point, line or polygon)
@@ -50,8 +52,9 @@ class Scenario:
                     return False # Returns False if collision occurs (not collision free)
             return True # Returns True if no collisions
         except AttributeError: # In case object does not have geom_type attribute (not shapely object)
-            print("The object is not a shapely object (Point, LineString, Polygon etc.)")
+            print("AttributeError: The object is not a shapely object (Point, LineString, Polygon etc.)")
         pass
+
 
     def plot_scenario(self): # Plot the scenario in matplotlib
         fig, ax = plt.subplots()
