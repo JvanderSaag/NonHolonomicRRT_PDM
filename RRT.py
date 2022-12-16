@@ -13,19 +13,21 @@ class TreeNode: # Tree Node class that RRT uses
 def RRT(N_iter, scenario, dist_tolerance=0.5, plot_all_trees=False): # RRT using TreeNodes
     start_Node, goal_Node = TreeNode(scenario.start), TreeNode(scenario.goal)
 
-    for n in range(N_iter):
+    for n in range(N_iter): # Max N_iter iterations
+        # Sample a random point in the space
         sampled_point = Point(rand_coords(scenario.width, scenario.height))
         sampled_Node = TreeNode(sampled_point)
 
         if not scenario.collision_free(sampled_point): # If the sampled point collides
-            continue 
+            continue # Continue to next iteration
         
+        # Find the closest node to sampled point
         parent_Node, path_to_parent, _ = find_closest_Node(scenario, start_Node, sampled_Node)
 
-        if parent_Node is not None:            
-            sampled_Node.parent = parent_Node
+        if parent_Node is not None:  # If a nearest node is found        
+            sampled_Node.parent = parent_Node # Update the sampled_Nodes parent, path
             sampled_Node.path_to_parent = path_to_parent   
-            parent_Node.children.append(sampled_Node)
+            parent_Node.children.append(sampled_Node) # add children to the parent
 
             # If the point is close to the goal, and the user does not want to plot all trees
             if sampled_Node.point.distance(goal_Node.point) < dist_tolerance and not plot_all_trees:
@@ -46,7 +48,7 @@ def rand_coords(width, height): # Generate random coordinates
 
 
 def find_closest_Node(scenario, start_Node, new_Node, radius=float('inf'), min_length=float('inf')): # Find closet Node in Tree
-    nearest_Node, shortest_path = None, None
+    nearest_Node, shortest_path = None, None # Initalise nearest Node and shortest path as None
 
     # Recursively check all children
     if start_Node.children: # If Node has children
@@ -58,9 +60,11 @@ def find_closest_Node(scenario, start_Node, new_Node, radius=float('inf'), min_l
             except StopIteration:
                 continue
     
-    # Either there are no children, or the recursive search is done (this code will be reached)
-    # CONNECTOR FUNCTION
+    # Either there are no children, or the recursive search is done (this code will be reached) 
+    # CONNECTOR FUNCTION #
     connect_line = LineString([start_Node.point, new_Node.point]) # Create a line that connects to the new Node
+
+    # COLLISION CHECK #
     if scenario.collision_free(connect_line): # If the line does not collide with the environment
         length = connect_line.length # Find length of connecting line
 
@@ -69,19 +73,20 @@ def find_closest_Node(scenario, start_Node, new_Node, radius=float('inf'), min_l
             nearest_Node = start_Node # set nearest node
             shortest_path = connect_line # define the shortest path
             min_length = length # then update minimum length
+    
     return nearest_Node, shortest_path, min_length
 
 
 def extract_all_edges(start_Node, total_tree=[]): # Extract all edges from tree
-    if start_Node.children:
-        for child in start_Node.children:
-            total_tree.append(child.path_to_parent)
-            extract_all_edges(child, total_tree)
+    if start_Node.children: # Iterate over all the children of the start_Node
+        for child in start_Node.children: # For each child
+            total_tree.append(child.path_to_parent) # Append path to total_tree
+            extract_all_edges(child, total_tree) # Recursively repeat over all its children
     return total_tree
     
 
 def extract_path(final_Node, final_path=[]): # Extract only final path from tree
-    if final_Node.parent is not None:
-        final_path.append(final_Node.path_to_parent)
-        extract_path(final_Node.parent, final_path)
+    if final_Node.parent is not None: # As long as there is a parent
+        final_path.append(final_Node.path_to_parent) # Append the path_to_parent to final path
+        extract_path(final_Node.parent, final_path) # Recursively repeat one layer up
     return final_path
