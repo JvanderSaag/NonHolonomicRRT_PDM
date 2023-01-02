@@ -57,7 +57,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=0.5): # RRT usi
 
     
     # If it does not converge, this code will be reached
-    raise Exception("\nRRT could not find a suitable path within the given number of iterations")
+    raise Exception("\nRRT could not find a suitable path within the given number of iterations. Please try again.\nIf it consistently fails to complete, increase the number of iterations.")
 
 
 def rand_coords(width, height): # Generate random coordinates

@@ -64,9 +64,25 @@ class Scenario:
             print("AttributeError: The object is not a shapely object (Point, LineString, Polygon etc.)")
         pass
     
+    # Return coordinates of obstacles, path, start and goal in that order
+    # Coordinate system is x, y starting from bottom left
     def return_coordinates(self):
+        # Get obstacle coordinates, a list of lists, where each nested list represents the exterior bounds of one obstacle
+        obstacle_coords = []
         for obstacle in self.obstacles:
-            print(obstacle.coords)
+            obstacle_coords.append(obstacle.exterior.coords[:])
+
+        # Get the coordinats of the path, return
+        path_coords = []
+        for segment in self.path[::-1]:
+            path_coords.append(segment.coords[0])
+
+        return obstacle_coords, path_coords, self.start.coords[:][0], self.goal.coords[:][0]
+
+
+    def return_scenariosize(self): # Returns size of environment (width, height)
+        return (self.width, self.height)
+
 
     def plot_scenario(self, plot_all_trees=False): # Plot the scenario in matplotlib
         fig, ax = plt.subplots()
