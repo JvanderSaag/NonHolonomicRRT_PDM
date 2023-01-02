@@ -3,3 +3,8 @@ Implementation of a RRT algorithm for a non-holonomic parking robot, created for
 
 
 return_coordinates of the scenario class returns the coordinates of all obstacles (a list of list, each nested list is another obstacle), the coordinates of the path (with linear segments connecting each point), the coordinate of the start, and the coordinate of the goal. All coordinates are given as (x, y), with the origin being at the bottom left of the environment.
+
+To access the gym env: 
+Clone gym_envs_urdf package: git@github.com:maxspahn/gym_envs_urdf.git
+Install poetry: https://python-poetry.org/docs/
+Run poetry via: $poetry shell
