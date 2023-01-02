@@ -1,5 +1,10 @@
+""" These are the functions used for the RRT algorithm, running the main RRT() function will
+    update the scenario class with the final path. Step size and distance tolerance can both be changed when calling RRT().
+"""
+
 import numpy as np
 from shapely.geometry import Point, LineString
+from tqdm import tqdm
 
 class TreeNode: # Tree Node class that RRT uses
     def __init__(self, point, yaw=None):
@@ -10,35 +15,49 @@ class TreeNode: # Tree Node class that RRT uses
         self.children = [] # Children, only used to draw the entire RRT tree
 
 
-def RRT(N_iter, scenario, dist_tolerance=0.5, plot_all_trees=False): # RRT using TreeNodes
+def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=0.5): # RRT using TreeNodes
     start_Node, goal_Node = TreeNode(scenario.start), TreeNode(scenario.goal)
 
-    for n in range(N_iter): # Max N_iter iterations
+    for n in tqdm(range(N_iter)): # Max N_iter iterations
         # Sample a random point in the space
         sampled_point = Point(rand_coords(scenario.width, scenario.height))
         sampled_Node = TreeNode(sampled_point)
 
         if not scenario.collision_free(sampled_point): # If the sampled point collides
             continue # Continue to next iteration
-        
-        # Find the closest node to sampled point
-        parent_Node, path_to_parent, _ = find_closest_Node(scenario, start_Node, sampled_Node)
 
-        if parent_Node is not None:  # If a nearest node is found        
+        # Find the closest node to sampled point
+        parent_Node, path_to_parent, _ = find_closest_Node(scenario, start_Node, sampled_Node, step_size)
+                        
+        if parent_Node is not None:  # If a nearest node is found      
+            if path_to_parent.length > step_size: # In the case that this parent node is not within the step size
+                # Find a new point on the connecting line that is within the radius
+                new_Node_inradius = TreeNode(path_to_parent.interpolate(step_size))
+                new_connect_line = LineString([parent_Node.point, new_Node_inradius.point])
+                # Update the sampled Node to this new point
+                sampled_Node = new_Node_inradius
+                path_to_parent = new_connect_line
+                # min_length = new_connect_line.length NOT IN USE AT THE MOMENT    
+              
             sampled_Node.parent = parent_Node # Update the sampled_Nodes parent, path
             sampled_Node.path_to_parent = path_to_parent   
             parent_Node.children.append(sampled_Node) # add children to the parent
 
-            # If the point is close to the goal, and the user does not want to plot all trees
-            if sampled_Node.point.distance(goal_Node.point) < dist_tolerance and not plot_all_trees:
-                final_path = extract_path(sampled_Node) # only final path will be plotted
-                return final_path
+            # If the point is close to the goal, save the path and total tree
+            if sampled_Node.point.distance(goal_Node.point) < dist_tolerance:
+                final_path = extract_path(sampled_Node)
+                total_tree = extract_all_edges(start_Node)
+                
+                # Update class attributes
+                scenario.set_path(final_path)
+                scenario.set_totaltree(total_tree)
+
+                print(f"\nRRT finished within {n} iterations")
+                return
+
     
-    if plot_all_trees: # If user wants to plot all trees
-        return extract_all_edges(start_Node)
- 
     # If it does not converge, this code will be reached
-    raise Exception("RRT could not find a suitable path within the given number of iterations")
+    raise Exception("\nRRT could not find a suitable path within the given number of iterations")
 
 
 def rand_coords(width, height): # Generate random coordinates
@@ -47,18 +66,15 @@ def rand_coords(width, height): # Generate random coordinates
     return Point(x, y)
 
 
-def find_closest_Node(scenario, start_Node, new_Node, radius=float('inf'), min_length=float('inf')): # Find closet Node in Tree
+def find_closest_Node(scenario, start_Node, new_Node, min_length=float('inf')): # Find closest Node in Tree
     nearest_Node, shortest_path = None, None # Initalise nearest Node and shortest path as None
 
     # Recursively check all children
     if start_Node.children: # If Node has children
         for child in start_Node.children: # Iterate over the children nodes
-            try:
-                temp_Node, temp_path, temp_length = find_closest_Node(scenario, child, new_Node, min_length=min_length)
-                if temp_length < min_length:
-                    nearest_Node, shortest_path, min_length = temp_Node, temp_path, temp_length
-            except StopIteration:
-                continue
+            temp_Node, temp_path, temp_length = find_closest_Node(scenario, child, new_Node, min_length=min_length)
+            if temp_length < min_length:
+                nearest_Node, shortest_path, min_length = temp_Node, temp_path, temp_length
     
     # Either there are no children, or the recursive search is done (this code will be reached) 
     # CONNECTOR FUNCTION #
@@ -69,11 +85,11 @@ def find_closest_Node(scenario, start_Node, new_Node, radius=float('inf'), min_l
         length = connect_line.length # Find length of connecting line
 
         # If this length is less than the saved min, and the limiting radius
-        if length < min_length and length < radius:  
+        if length < min_length:
             nearest_Node = start_Node # set nearest node
             shortest_path = connect_line # define the shortest path
             min_length = length # then update minimum length
-    
+       
     return nearest_Node, shortest_path, min_length
 
 
@@ -90,3 +106,4 @@ def extract_path(final_Node, final_path=[]): # Extract only final path from tree
         final_path.append(final_Node.path_to_parent) # Append the path_to_parent to final path
         extract_path(final_Node.parent, final_path) # Recursively repeat one layer up
     return final_path
+

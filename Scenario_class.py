@@ -13,7 +13,7 @@ class Scenario:
         self.height = env_height
 
         # Initalise attributes as none, updated with other functions
-        self.obstacles, self.goal, self.start, self.path = [], None, None, []
+        self.obstacles, self.goal, self.start, self.path, self.total_tree = [], None, None, [], []
 
         # If boundary collision is set to true, bbox is created.
         if boundary_collision: 
@@ -43,6 +43,11 @@ class Scenario:
         self.path = path
         pass
 
+    
+    def set_totaltree(self, tree):
+        self.total_tree = tree
+        pass 
+
 
     def collision_free(self, object): # Check if given path/points object from RRT is collision_free
         try: # Object can be any shapely object (point, line or polygon)
@@ -50,15 +55,20 @@ class Scenario:
             for obstacle in self.obstacles:
                 if object.intersects(obstacle): # Check collisions with obstacles in scenario
                     return False # Returns False if collision occurs (not collision free)
-            if object.intersects(self.boundary): # Check collisions with the boundary in scenario
-                return False # Returns False if collision occurs (not collision free)
+            if self.boundary is not None:
+                if object.intersects(self.boundary): # Check collisions with the boundary in scenario
+                    return False # Returns False if collision occurs (not collision free)
             return True # Returns True if no collisions
+        
         except AttributeError: # In case object does not have geom_type attribute (not shapely object)
             print("AttributeError: The object is not a shapely object (Point, LineString, Polygon etc.)")
         pass
+    
+    def return_coordinates(self):
+        for obstacle in self.obstacles:
+            print(obstacle.coords)
 
-
-    def plot_scenario(self): # Plot the scenario in matplotlib
+    def plot_scenario(self, plot_all_trees=False): # Plot the scenario in matplotlib
         fig, ax = plt.subplots()
 
         # Set boundaries for drawing scenario
@@ -68,7 +78,6 @@ class Scenario:
         # Draw obstacles
         for obstacle in self.obstacles:
             ax.add_patch(matplotlib.patches.Polygon(obstacle.exterior.coords, color="grey"))
-            # plt.plot(*obstacle.exterior.xy)
         
         # Draw start and goal
         if self.start is not None and self.goal is not None:
@@ -79,11 +88,15 @@ class Scenario:
         if self.boundary is not None:
             plt.plot(*self.boundary.xy, color="k")
         
-        # Draw path, if it exists
-        for path in self.path:
-            plt.plot(*path.xy, c='tab:blue', alpha=0.4)
-            # for line in path:
-            #     plt.plot(*line.xy, c='tab:blue', alpha=0.4)
+        # Draw path, if it exists and not all trees are plotted
+        if not plot_all_trees:
+            for path in self.path:
+                plt.plot(*path.xy, c='tab:blue', alpha=0.4)
+
+        # Draw all trees if it plot_all_trees is True
+        if plot_all_trees:
+            for tree in self.total_tree:
+                plt.plot(*tree.xy, c='tab:blue', alpha=0.4)
 
         plt.legend()
         plt.show()
