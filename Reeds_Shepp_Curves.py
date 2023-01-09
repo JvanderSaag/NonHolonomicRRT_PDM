@@ -3,7 +3,7 @@ Reeds Shepp path planner sample code
 author Atsushi Sakai(@Atsushi_twi)
 """
 import math
-
+from shapely.geometry import LineString
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -27,16 +27,6 @@ class Path:
         self.directions = []  # directions (1:forward, -1:backward)
 
 
-def plot_arrow(x, y, yaw, length=1.0, width=0.5, fc="r", ec="k"):
-    if isinstance(x, list):
-        for (ix, iy, iyaw) in zip(x, y, yaw):
-            plot_arrow(ix, iy, iyaw)
-    else:
-        plt.arrow(x, y, length * math.cos(yaw), length * math.sin(yaw), fc=fc,
-                  ec=ec, head_width=width, head_length=width)
-        plt.plot(x, y)
-
-
 def mod2pi(x):
     # Be consistent with fmod in cplusplus here.
     v = np.mod(x, np.copysign(2.0 * math.pi, x))
@@ -48,22 +38,10 @@ def mod2pi(x):
     return v
 
 
-def straight_left_straight(x, y, phi):
-    phi = mod2pi(phi)
-    if y > 0.0 and 0.0 < phi < math.pi * 0.99:
-        xd = - y / math.tan(phi) + x
-        t = xd - math.tan(phi / 2.0)
-        u = phi
-        v = math.sqrt((x - xd) ** 2 + y ** 2) - math.tan(phi / 2.0)
-        return True, t, u, v
-    elif y < 0.0 < phi < math.pi * 0.99:
-        xd = - y / math.tan(phi) + x
-        t = xd - math.tan(phi / 2.0)
-        u = phi
-        v = -math.sqrt((x - xd) ** 2 + y ** 2) - math.tan(phi / 2.0)
-        return True, t, u, v
-
-    return False, 0.0, 0.0, 0.0
+def polar(x, y):
+    r = math.sqrt(x ** 2 + y ** 2)
+    theta = math.atan2(y, x)
+    return r, theta
 
 
 def set_path(paths, lengths, ctypes, step_size):
@@ -87,6 +65,24 @@ def set_path(paths, lengths, ctypes, step_size):
     return paths
 
 
+def straight_left_straight(x, y, phi):
+    phi = mod2pi(phi)
+    if y > 0.0 and 0.0 < phi < math.pi * 0.99:
+        xd = - y / math.tan(phi) + x
+        t = xd - math.tan(phi / 2.0)
+        u = phi
+        v = math.sqrt((x - xd) ** 2 + y ** 2) - math.tan(phi / 2.0)
+        return True, t, u, v
+    elif y < 0.0 < phi < math.pi * 0.99:
+        xd = - y / math.tan(phi) + x
+        t = xd - math.tan(phi / 2.0)
+        u = phi
+        v = -math.sqrt((x - xd) ** 2 + y ** 2) - math.tan(phi / 2.0)
+        return True, t, u, v
+
+    return False, 0.0, 0.0, 0.0
+
+
 def straight_curve_straight(x, y, phi, paths, step_size):
     flag, t, u, v = straight_left_straight(x, y, phi)
     if flag:
@@ -97,12 +93,6 @@ def straight_curve_straight(x, y, phi, paths, step_size):
         paths = set_path(paths, [t, u, v], ["S", "R", "S"], step_size)
 
     return paths
-
-
-def polar(x, y):
-    r = math.sqrt(x ** 2 + y ** 2)
-    theta = math.atan2(y, x)
-    return r, theta
 
 
 def left_straight_left(x, y, phi):
@@ -129,7 +119,7 @@ def left_right_left(x, y, phi):
     return False, 0.0, 0.0, 0.0
 
 
-def curve_curve_curve(x, y, phi, paths, step_size):
+def curve_curve_curve(x, y, phi, paths, step_size, backwards):
     flag, t, u, v = left_right_left(x, y, phi)
     if flag:
         paths = set_path(paths, [t, u, v], ["L", "R", "L"], step_size)
@@ -146,25 +136,26 @@ def curve_curve_curve(x, y, phi, paths, step_size):
     if flag:
         paths = set_path(paths, [-t, -u, -v], ["R", "L", "R"], step_size)
 
-    # backwards
-    xb = x * math.cos(phi) + y * math.sin(phi)
-    yb = x * math.sin(phi) - y * math.cos(phi)
+    if backwards:
+        # backwards
+        xb = x * math.cos(phi) + y * math.sin(phi)
+        yb = x * math.sin(phi) - y * math.cos(phi)
 
-    flag, t, u, v = left_right_left(xb, yb, phi)
-    if flag:
-        paths = set_path(paths, [v, u, t], ["L", "R", "L"], step_size)
+        flag, t, u, v = left_right_left(xb, yb, phi)
+        if flag:
+            paths = set_path(paths, [v, u, t], ["L", "R", "L"], step_size)
 
-    flag, t, u, v = left_right_left(-xb, yb, -phi)
-    if flag:
-        paths = set_path(paths, [-v, -u, -t], ["L", "R", "L"], step_size)
+        flag, t, u, v = left_right_left(-xb, yb, -phi)
+        if flag:
+            paths = set_path(paths, [-v, -u, -t], ["L", "R", "L"], step_size)
 
-    flag, t, u, v = left_right_left(xb, -yb, -phi)
-    if flag:
-        paths = set_path(paths, [v, u, t], ["R", "L", "R"], step_size)
+        flag, t, u, v = left_right_left(xb, -yb, -phi)
+        if flag:
+            paths = set_path(paths, [v, u, t], ["R", "L", "R"], step_size)
 
-    flag, t, u, v = left_right_left(-xb, -yb, phi)
-    if flag:
-        paths = set_path(paths, [-v, -u, -t], ["R", "L", "R"], step_size)
+        flag, t, u, v = left_right_left(-xb, -yb, phi)
+        if flag:
+            paths = set_path(paths, [-v, -u, -t], ["R", "L", "R"], step_size)
 
     return paths
 
@@ -220,7 +211,7 @@ def left_straight_right(x, y, phi):
     return False, 0.0, 0.0, 0.0
 
 
-def generate_path(q0, q1, max_curvature, step_size):
+def generate_path(q0, q1, max_curvature, step_size, backwards):
     dx = q1[0] - q0[0]
     dy = q1[1] - q0[1]
     dth = q1[2] - q0[2]
@@ -232,7 +223,7 @@ def generate_path(q0, q1, max_curvature, step_size):
     paths = []
     paths = straight_curve_straight(x, y, dth, paths, step_size)
     paths = curve_straight_curve(x, y, dth, paths, step_size)
-    paths = curve_curve_curve(x, y, dth, paths, step_size)
+    paths = curve_curve_curve(x, y, dth, paths, step_size, backwards)
 
     return paths
 
@@ -300,11 +291,11 @@ def pi_2_pi(angle):
     return (angle + math.pi) % (2 * math.pi) - math.pi
 
 
-def calc_paths(sx, sy, syaw, gx, gy, gyaw, maxc, step_size):
+def calc_paths(sx, sy, syaw, gx, gy, gyaw, maxc, step_size, backwards):
     q0 = [sx, sy, syaw]
     q1 = [gx, gy, gyaw]
 
-    paths = generate_path(q0, q1, maxc, step_size)
+    paths = generate_path(q0, q1, maxc, step_size, backwards)
     for path in paths:
         xs, ys, yaws, directions = generate_local_course(path.lengths,
                                                          path.ctypes, maxc,
@@ -323,12 +314,19 @@ def calc_paths(sx, sy, syaw, gx, gy, gyaw, maxc, step_size):
     return paths
 
 
-def reeds_shepp_path_planning(sx, sy, syaw, gx, gy, gyaw, maxc, step_size=0.2):
-    paths = calc_paths(sx, sy, syaw, gx, gy, gyaw, maxc, step_size)
-    if not paths:
+def reeds_shepp_path_planning(sx, sy, syaw, gx, gy, gyaw, maxc, step_size=0.2, backwards=True):
+    paths = calc_paths(sx, sy, syaw, gx, gy, gyaw, maxc, step_size, backwards)
+    if paths is None:
         return None, None, None, None, None  # could not generate any path
 
     # search minimum cost path
+    linestring_list = []
+    for path in paths:
+        x, y = np.array(path.x), np.array(path.y)
+        coord = np.vstack((x, y)).T
+        linestring_list.append(LineString(coord))
+    return sorted(linestring_list, key=lambda x: x.length)
+
     best_path_index = paths.index(min(paths, key=lambda p: abs(p.L)))
     b_path = paths[best_path_index]
 
