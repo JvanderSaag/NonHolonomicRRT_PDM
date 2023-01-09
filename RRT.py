@@ -5,6 +5,7 @@
 import numpy as np
 from shapely.geometry import Point, LineString
 from tqdm import tqdm
+from Reeds_Shepp_Curves import reeds_shepp_path_planning
 
 class TreeNode: # Tree Node class that RRT uses
     def __init__(self, point, yaw=None):
@@ -17,22 +18,22 @@ class TreeNode: # Tree Node class that RRT uses
         self.children = [] # Children, only used to draw the entire RRT tree
 
 
-def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=0.2, goal_prob=0.05, star=True): # RRT using TreeNodes
+def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, goal_prob=0.05, star=True, non_holonomic=True): # RRT using TreeNodes
     # Initialise start and goal node
-    start_Node, goal_Node = TreeNode(scenario.start), TreeNode(scenario.goal)
+    start_Node, goal_Node = TreeNode(scenario.start, 0), TreeNode(scenario.goal, 0)
 
     for n in tqdm(range(N_iter)): # Max N_iter iterations
         if np.random.random_sample() < goal_prob: # Have a chance of picking the goal node as the sampled node
             sampled_Node = goal_Node
         else:  # Otherwise, randomly sample a point in the environment
-            sampled_Node = TreeNode(Point(rand_coords(scenario.width, scenario.height)))
+            sampled_Node = TreeNode(Point(rand_coords(scenario.width, scenario.height)), np.deg2rad(np.random.randint(-180,180,1)))
 
          # If the sampled point collides with obstacles
         if not scenario.collision_free(sampled_Node.point):
             continue # Continue to next iteration
 
         # Find the closest node to sampled point
-        parent_Node, path_to_parent, _ = find_closest_Node(scenario, start_Node, sampled_Node)
+        parent_Node, path_to_parent, _ = find_closest_Node(scenario, start_Node, sampled_Node, non_holonomic)
 
         if parent_Node is not None and not parent_Node.point.equals(sampled_Node.point):  # If a nearest node is found     
             if path_to_parent.length > step_size: # In the case that this parent node is not within the step size
@@ -44,10 +45,9 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=0.2, goal_prob=
                         
             # Update the sampled_Node cost
             sampled_Node.cost = parent_Node.cost + path_to_parent.length 
-            
             if star: # If RRT* is used, the tree will be redrawn
                 # Within a certain radius, find nearby points
-                radius = 5
+                radius = 10
                 Nodes_near_sample = find_nearby_nodes(start_Node, sampled_Node, radius, nearby_Nodes=[])
 
                 if Nodes_near_sample: # If there are nearby nodes
@@ -59,14 +59,16 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=0.2, goal_prob=
                             sampled_Node.cost = min_cost
 
             # Create the path to parent and check if it is collision-free
-            path_to_parent = create_connector(parent_Node.point, sampled_Node.point) # NEW CONNETOR FUNCTION
+            path_to_parent = create_connector(parent_Node, sampled_Node, scenario, non_holonomic) # NEW CONNETOR FUNCTION
+            if path_to_parent is None:
+                continue
             if not scenario.collision_free(path_to_parent):
                 continue # If it collides, continue to next iteration
 
             # Update parent node with children, and sampled Node with parent
             parent_Node.children.append(sampled_Node)
             sampled_Node.parent = parent_Node 
-            sampled_Node.path_to_parent = create_connector(parent_Node.point, sampled_Node.point) 
+            sampled_Node.path_to_parent = path_to_parent
 
             # Early stop if normal RRT is used, as once the goal is reached the path won't change
             if not star and sampled_Node.point.distance(goal_Node.point) < dist_tolerance:
@@ -88,9 +90,10 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=0.2, goal_prob=
     # Else RRT* has found a path, find the shortest one if there are several
     Node_min_cost = min(Nodes_near_goal, key=lambda x: x.cost)
     shortest_path = extract_path(Node_min_cost)
-
+    
     # Finally set final path and 'total' tree containing all edges
     final_path = shortest_path 
+
     total_tree = extract_all_edges(start_Node)
 
     # Update class attributes
@@ -108,20 +111,24 @@ def rand_coords(width, height): # Generate random coordinates within bounds of e
     return Point(x, y)
 
 
-def find_closest_Node(scenario, start_Node, new_Node, min_length=float('inf')): # Find closest Node in Tree
+def find_closest_Node(scenario, start_Node, new_Node, non_holonomic, min_length=float('inf')): # Find closest Node in Tree
     nearest_Node, shortest_path = None, None # Initalise nearest Node and shortest path as None
 
     # Recursively check all children
     if start_Node.children: # If Node has children
         for child in start_Node.children: # Iterate over the children nodes
-            temp_Node, temp_path, temp_length = find_closest_Node(scenario, child, new_Node, min_length=min_length)
+            temp_Node, temp_path, temp_length = find_closest_Node(scenario, child, new_Node, non_holonomic, min_length=min_length)
+            if temp_Node is None:
+                return nearest_Node, shortest_path, min_length
             if temp_length < min_length:
                 nearest_Node, shortest_path, min_length = temp_Node, temp_path, temp_length
     
     # Either there are no children, or the recursive search is done (following code will be reached) #
     # CONNECTOR FUNCTION #
-    connect_line = create_connector(start_Node.point, new_Node.point) # Create a line that connects to the new Node
-
+    connect_line = create_connector(start_Node, new_Node, scenario, non_holonomic) # Create a line that connects to the new Node
+    if connect_line is None:
+        return nearest_Node, shortest_path, min_length
+    
     # COLLISION CHECK #
     if scenario.collision_free(connect_line): # If the line does not collide with the environment
         length = connect_line.length # Find length of connecting line
@@ -159,6 +166,15 @@ def extract_path(final_Node, path=[]): # Extract only final path from tree
     return path
 
 
-def create_connector(Point1, Point2):
-    connector = LineString([Point1, Point2])
-    return connector
+def create_connector(Node1, Node2, scenario, non_holonomic=True):
+    if not non_holonomic:
+        return LineString([Node1.point, Node2.point])
+    maxc = 0.3
+    sx, sy, syaw = Node1.point.x, Node1.point.y , Node1.yaw
+    gx, gy, gyaw = Node2.point.x, Node2.point.y, Node2.yaw
+    connect_line_list = reeds_shepp_path_planning(sx, sy, syaw, gx, gy, gyaw, maxc, step_size=0.2)
+    if connect_line_list is not None:
+        for connect_line in connect_line_list:
+            if scenario.collision_free(connect_line): # If the line does not collide with the environment
+                return connect_line
+    return None
