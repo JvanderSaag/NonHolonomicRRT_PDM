@@ -108,11 +108,14 @@ class Scenario:
         if not plot_all_trees:
             for path in self.path:
                 plt.plot(*path.xy, c='tab:blue', alpha=0.4)
+                
 
         # Draw all trees if it plot_all_trees is True
         if plot_all_trees:
+            for path in self.path:
+                plt.plot(*path.xy, c='tab:blue', alpha=0.5)
             for tree in self.total_tree:
-                plt.plot(*tree.xy, c='tab:blue', alpha=0.4)
+                plt.plot(*tree.xy, c='tab:green', alpha=0.15)
 
         plt.legend()
         plt.show()
