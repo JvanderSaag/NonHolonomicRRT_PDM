@@ -18,7 +18,8 @@ def closest_point(scenario, tree, new_point, new_point_orientation, radius=float
         maxc = 0.1
         sx, sy, syaw = new_point.x, new_point.y, new_point_orientation
         gx, gy, gyaw = point.x, point.y, tree.orientation[id]
-        path_xs, path_ys, _, _, path_lenghts = Reeds_Shepp_Curves.reeds_shepp_path_planning(sx, sy, syaw, gx, gy, gyaw, maxc, step_size=0.2)
+        path_xs, path_ys, _, _, path_lenghts = Reeds_Shepp_Curves.reeds_shepp_path_planning(sx, sy, syaw, gx, gy, gyaw, maxc, step_size=0.2)   
+
 
         path_list = []
         for i in range(len(path_xs) - 1):
@@ -41,6 +42,7 @@ def RRT(N_iter, scenario):
     search_tree = Tree(scenario.start, scenario.goal)
 
     for n in range(N_iter):
+        print(n)
         sampled_point = Point(rand_coords(scenario.width, scenario.height))
         sample_orientation = np.deg2rad(np.random.randint(-180,180,1))
         if not scenario.collision_free(sampled_point):
