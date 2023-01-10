@@ -19,15 +19,19 @@ class TreeNode: # Tree Node class that RRT uses
 
 
 ## RRT/ RRT* implementation for global motion planner ##
-def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, goal_prob=0.05, star=True, non_holonomic=True, force_plot_tree=False):
+def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, non_holonomic=True, force_plot_tree=False):
     # Initialise start and goal node
     start_Node, goal_Node = TreeNode(scenario.start[0], scenario.start[1]), TreeNode(scenario.goal[0], scenario.goal[1])
 
     for n in tqdm(range(N_iter)): # Max N_iter iterations
-        if np.random.random_sample() < goal_prob: # Have a chance of picking the goal node as the sampled node
+        if np.random.random_sample() < 0.05: # Have a chance of picking the goal node as the sampled node
             sampled_Node = goal_Node
+        elif np.random.random_sample() < 0.05: # Have a chance of changing orientation to face goal
+            random_point = rand_coords(scenario.width, scenario.height)
+            angle_to_goal = np.degrees(np.arctan((goal_Node.point.y - random_point.y) / (goal_Node.point.x - random_point.x))) + 180
+            sampled_Node = TreeNode(random_point, angle_to_goal)
         else:  # Otherwise, randomly sample a point in the environment
-            sampled_Node = TreeNode(Point(rand_coords(scenario.width, scenario.height)), np.deg2rad(np.random.randint(-180, 180,1)))
+            sampled_Node = TreeNode(rand_coords(scenario.width, scenario.height), np.deg2rad(np.random.randint(-180, 180,1)))
 
         # If the sampled point collides with obstacles
         if not scenario.collision_free(sampled_Node.point):
@@ -92,7 +96,8 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, goal_prob=0.
 
     if Nodes_near_goal:
         # Else RRT* has found a path, find the shortest one if there are several
-        Node_min_cost = min(Nodes_near_goal, key=lambda x: x.cost)
+        #cost_estimate = sampled_Node.point.distance(node.point) + min(abs(sampled_Node.yaw - node.yaw), 360 - abs(sampled_Node.yaw - node.yaw))
+        Node_min_cost = min(Nodes_near_goal, key=lambda x: x.cost + 3 * sampled_Node.point.distance(x.point) + min(abs(sampled_Node.yaw - x.yaw), 360 - abs(sampled_Node.yaw - x.yaw)))
         shortest_path = extract_path(Node_min_cost)
 
         # Finally set final path and 'total' tree containing all edges
