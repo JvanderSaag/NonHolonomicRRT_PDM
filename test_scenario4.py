@@ -17,5 +17,5 @@ simple_Scenario = Scenario_class.Scenario(env_width=20, env_height=20, boundary_
 simple_Scenario.set_obstacles(obstacles)
 simple_Scenario.set_start_goal(start, start_yaw, goal, goal_yaw)
 
-RRT(5000, simple_Scenario)
+RRT(1000, simple_Scenario)
 simple_Scenario.plot_scenario()

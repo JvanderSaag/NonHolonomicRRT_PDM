@@ -13,8 +13,7 @@ start, start_yaw, goal, goal_yaw = Point(1, 1), 0, Point(19, 19), 0
 
 simple_Scenario = Scenario_class.Scenario(env_width=20, env_height=20, boundary_collision=True)
 simple_Scenario.set_obstacles(obstacles)
-simple_Scenario.set_vehicle(2, 0.5)
 simple_Scenario.set_start_goal(start, start_yaw, goal, goal_yaw)
 
-RRT(1000, simple_Scenario, star=False)
-simple_Scenario.plot_scenario(plot_all_trees=True)
+RRT(1000, simple_Scenario)
+simple_Scenario.plot_scenario()
