@@ -8,7 +8,7 @@ from tqdm import tqdm
 from Reeds_Shepp_Curves import reeds_shepp_path_planning
 
 class TreeNode: # Tree Node class that RRT uses
-    def __init__(self, point, yaw=None):
+    def __init__(self, point, yaw):
         self.point = point # This should be shapely PointObject, containing coordinate informatioj
         self.yaw = yaw # Orientation of vehicle
 
@@ -39,7 +39,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, goal_prob=0.
         if parent_Node is not None and not parent_Node.point.equals(sampled_Node.point):  # If a nearest node is found     
             if path_to_parent.length > step_size: # In the case that this parent node is not within the step size
                 # Find a new point on the connecting line that is within the radius
-                new_Node_inradius = TreeNode(path_to_parent.interpolate(step_size))
+                new_Node_inradius = TreeNode(path_to_parent.interpolate(step_size), parent_Node.yaw)
 
                 # Update the sampled Node to this new point
                 sampled_Node = new_Node_inradius
@@ -53,11 +53,12 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, goal_prob=0.
 
                 if Nodes_near_sample: # If there are nearby nodes
                     min_cost = sampled_Node.cost # First set the upper bound of cost (current cost of sampled Node)
+                    
                     for node in Nodes_near_sample: # For each nearby node
                         # Estimate cost by using distance and difference in angle, avoids redrawing new connectors for each node
                         cost_estimate = sampled_Node.point.distance(node.point) + min(abs(sampled_Node.yaw - node.yaw), 360 - abs(sampled_Node.yaw - node.yaw))
                         cost_via_node = node.cost + cost_estimate
-                        
+
                         if cost_via_node < min_cost: # If this cost is less, update the parent Node
                             parent_Node, min_cost = node, cost_via_node
                             sampled_Node.cost = min_cost
@@ -185,7 +186,7 @@ def create_connector(Node1, Node2, scenario, non_holonomic=True):
     gx, gy, gyaw = Node2.point.x, Node2.point.y, Node2.yaw # Coordinates and orientatio of Node 2
     
     # Return list of possible connecting curves from Reeds-Schepp
-    connect_line_list = reeds_shepp_path_planning(sx, sy, syaw, gx, gy, gyaw, maxc, step_size=0.2) 
+    connect_line_list = reeds_shepp_path_planning(sx, sy, syaw, gx, gy, gyaw, maxc)
     if connect_line_list is not None: # If list is not empty
         for connect_line in connect_line_list:
             if scenario.collision_free(connect_line): # If the line does not collide with the environment
