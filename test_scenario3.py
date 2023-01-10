@@ -13,7 +13,7 @@ start, goal = Point(1, 1), Point (19, 19)
 
 simple_Scenario = Scenario_class.Scenario(env_width=20, env_height=20, boundary_collision=True)
 simple_Scenario.set_obstacles(obstacles)
-simple_Scenario.set_start_goal(start, goal)
+simple_Scenario.set_start_goal(start, start_yaw, goal, goal_yaw)
 
-RRT(100, simple_Scenario)
+RRT(1000, simple_Scenario)
 simple_Scenario.plot_scenario()
