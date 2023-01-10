@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches
 
 class Scenario:
-    def __init__(self, env_width, env_height, boundary_collision=False):
+    def __init__(self, env_width, env_height, curve_radius, boundary_collision=False):
         # Set width and height
         self.width = env_width
         self.height = env_height
@@ -24,6 +24,9 @@ class Scenario:
         
         # Initialise size of vehicle to zero
         self.vehicle_length, self.vehicle_width = 0, 0
+
+        # Initialise the curvature radiuses of the vehicule
+        self.curve_radius = curve_radius
         pass
 
 

@@ -175,8 +175,8 @@ def create_connector(Node1, Node2, scenario, non_holonomic=True):
     # If linear connectors are desired, non_holonomic can be set to False
     if not non_holonomic:
         return LineString([Node1.point, Node2.point])
-
-    maxc = 0.3 # Turning radius
+    
+    maxc = scenario.curve_radius # Turning radius
     sx, sy, syaw = Node1.point.x, Node1.point.y , Node1.yaw # Coordinates and orientation of Node 1
     gx, gy, gyaw = Node2.point.x, Node2.point.y, Node2.yaw # Coordinates and orientatio of Node 2
     
