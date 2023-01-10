@@ -97,7 +97,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
     if Nodes_near_goal:
         # Else RRT* has found a path, find the shortest one if there are several
         #cost_estimate = sampled_Node.point.distance(node.point) + min(abs(sampled_Node.yaw - node.yaw), 360 - abs(sampled_Node.yaw - node.yaw))
-        Node_min_cost = min(Nodes_near_goal, key=lambda x: x.cost + 3 * sampled_Node.point.distance(x.point) + min(abs(sampled_Node.yaw - x.yaw), 360 - abs(sampled_Node.yaw - x.yaw)))
+        Node_min_cost = min(Nodes_near_goal, key=lambda x: (x.cost) * (sampled_Node.point.distance(x.point) + min(abs(sampled_Node.yaw - x.yaw), 360 - abs(sampled_Node.yaw - x.yaw))))
         shortest_path = extract_path(Node_min_cost)
 
         # Finally set final path and 'total' tree containing all edges
