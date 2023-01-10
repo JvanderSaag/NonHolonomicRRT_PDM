@@ -27,7 +27,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, goal_prob=0.
         if np.random.random_sample() < goal_prob: # Have a chance of picking the goal node as the sampled node
             sampled_Node = goal_Node
         else:  # Otherwise, randomly sample a point in the environment
-            sampled_Node = TreeNode(Point(rand_coords(scenario.width, scenario.height)), np.deg2rad(np.random.randint(-180,180,1)))
+            sampled_Node = TreeNode(Point(rand_coords(scenario.width, scenario.height)), np.deg2rad(np.random.randint(-180, 180,1)))
 
         # If the sampled point collides with obstacles
         if not scenario.collision_free(sampled_Node.point):
@@ -54,7 +54,10 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, goal_prob=0.
                 if Nodes_near_sample: # If there are nearby nodes
                     min_cost = sampled_Node.cost # First set the upper bound of cost (current cost of sampled Node)
                     for node in Nodes_near_sample: # For each nearby node
-                        cost_via_node = node.cost + sampled_Node.point.distance(node.point) # Cost estimator using distance
+                        # Estimate cost by using distance and difference in angle, avoids redrawing new connectors for each node
+                        cost_estimate = sampled_Node.point.distance(node.point) + min(abs(sampled_Node.yaw - node.yaw), 360 - abs(sampled_Node.yaw - node.yaw))
+                        cost_via_node = node.cost + cost_estimate
+                        
                         if cost_via_node < min_cost: # If this cost is less, update the parent Node
                             parent_Node, min_cost = node, cost_via_node
                             sampled_Node.cost = min_cost
@@ -102,7 +105,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, goal_prob=0.
         # RRT* is done
         print(f"\nRRT* finished within {n+1} iterations")
         return
-        
+
     else: # If it does not converge, there will be no Nodes near the goal
         if force_plot_tree: # Force plot the tree, regardless whether it converges
             print("Force plotted the entire tree, convergence not guaranteed")
