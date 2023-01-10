@@ -50,7 +50,7 @@ class Scenario:
     
     # set vehicle size to be used for Buffer around obstacles
     def set_vehicle(self, curve_radius, length=0, width=0):
-        self.curve_radius = np.linspace(0, curve_radius, 6).tolist()
+        self.curve_radius = np.linspace(0.1, curve_radius, 6).tolist()
         self.vehicle_length = length
         self.vehicle_width = width
         pass
