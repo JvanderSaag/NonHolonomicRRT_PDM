@@ -25,8 +25,9 @@ class Scenario:
         # Initialise size of vehicle to zero
         self.vehicle_length, self.vehicle_width = 0, 0
 
-        # Initialise the curvature radiuses of the vehicule
+        # Initialise the curvature radiuses of the vehicle
         self.curve_radius = curve_radius
+        
         pass
 
 
