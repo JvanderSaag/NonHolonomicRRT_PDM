@@ -26,13 +26,13 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
     for n in tqdm(range(N_iter)): # Max N_iter iterations
         if np.random.random_sample() < 0.05: # Have a chance of picking the goal node as the sampled node
             sampled_Node = goal_Node
-        elif np.random.random_sample() < 0.05: # Have a chance of changing orientation to face goal
-            random_point = rand_coords(scenario.width, scenario.height)
-            angle_to_goal = np.degrees(np.arctan((goal_Node.point.y - random_point.y) / (goal_Node.point.x - random_point.x))) + 180
-            sampled_Node = TreeNode(random_point, angle_to_goal)
         else:  # Otherwise, randomly sample a point in the environment
             sampled_Node = TreeNode(rand_coords(scenario.width, scenario.height), np.deg2rad(np.random.randint(-180, 180,1)))
-
+            # Random chance to orient point to goal, only if sampled point is not the goal
+            if not sampled_Node.point.equals(goal_Node.point) and np.random.random_sample() < 0.05:
+                angle_to_goal = np.degrees(np.arctan((goal_Node.point.y - sampled_Node.y) / (goal_Node.point.x - sampled_Node.x))) + 180
+                sampled_Node = sampled_Node.yaw = angle_to_goal
+                
         # If the sampled point collides with obstacles
         if not scenario.collision_free(sampled_Node.point):
             continue # Continue to next iteration
