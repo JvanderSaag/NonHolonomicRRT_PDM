@@ -9,7 +9,7 @@ ObstacleCreator.create_polygon([(5, 0), (5, 12.5), (8.5, 12.5), (8.5, 5), (15, 5
 ObstacleCreator.create_polygon([(5, 20), (5, 17.5), (11.5, 17.5), (11.5, 10), (15, 10), (15, 20)])
 
 obstacles = ObstacleCreator.return_obstacles()
-start, goal = Point(1, 1), Point (19, 19)
+start, start_yaw, goal, goal_yaw = Point(1, 1), 0, Point (19, 19), 0
 
 simple_Scenario = Scenario_class.Scenario(env_width=20, env_height=20, boundary_collision=True)
 simple_Scenario.set_obstacles(obstacles)
