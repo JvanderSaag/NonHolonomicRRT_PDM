@@ -169,7 +169,7 @@ def extract_path(final_Node, path=[]): # Extract only final path from tree
 def create_connector(Node1, Node2, scenario, non_holonomic=True):
     if not non_holonomic:
         return LineString([Node1.point, Node2.point])
-    maxc = 0.3
+    maxc = np.linspace(0.1, 0.6, num=6)
     sx, sy, syaw = Node1.point.x, Node1.point.y , Node1.yaw
     gx, gy, gyaw = Node2.point.x, Node2.point.y, Node2.yaw
     connect_line_list = reeds_shepp_path_planning(sx, sy, syaw, gx, gy, gyaw, maxc, step_size=0.2)
