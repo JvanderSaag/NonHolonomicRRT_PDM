@@ -11,11 +11,11 @@ ObstacleCreator.create_polygon([(12, 3), (14, 8), (18, 2)])
 ObstacleCreator.create_polygon([(12, 11), (16, 10), (18, 15)])
 
 obstacles = ObstacleCreator.return_obstacles()
-start, goal = Point(1, 1), Point (19, 19)
+start, start_yaw, goal, goal_yaw = Point(1, 1), 0, Point(19, 19), 0
 
 simple_Scenario = Scenario_class.Scenario(env_width=20, env_height=20, boundary_collision=True)
 simple_Scenario.set_obstacles(obstacles)
-simple_Scenario.set_start_goal(start, goal)
+simple_Scenario.set_start_goal(start, start_yaw, goal, goal_yaw)
 
-RRT(10000, simple_Scenario)
+RRT(5000, simple_Scenario)
 simple_Scenario.plot_scenario()

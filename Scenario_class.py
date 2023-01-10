@@ -21,13 +21,16 @@ class Scenario:
             self.boundary = shapely.geometry.LineString(bbox_coords)
         else:
             self.boundary = None # Else None boundary
+        
+        # Initialise size of vehicle to zero
+        self.vehicle_length, self.vehicle_width = 0, 0
         pass
 
 
-    def set_start_goal(self, start, goal):
+    def set_start_goal(self, start, yaw_start, goal, yaw_goal):
         # Set start and goal, and assert datatype is correct
         assert isinstance(start, shapely.geometry.Point) and isinstance(goal, shapely.geometry.Point), "AssertError: Start and goal are not defined by points!" 
-        self.start, self.goal = start, goal
+        self.start, self.goal = (start, yaw_start), (goal, yaw_goal)
         pass
 
 
@@ -47,13 +50,17 @@ class Scenario:
     def set_totaltree(self, tree):
         self.total_tree = tree
         pass 
-
+    
+    # set vehicle size to be used for Buffer around obstacles
+    def set_vehicle(self, length, width):
+        self.vehicle_length = length
+        self.vehicle_width = width
 
     def collision_free(self, object): # Check if given path/points object from RRT is collision_free
         try: # Object can be any shapely object (point, line or polygon)
             object.geom_type # Check if object is shapely geometry object
             for obstacle in self.obstacles:
-                if object.intersects(obstacle): # Check collisions with obstacles in scenario
+                if object.intersects(obstacle.buffer(self.vehicle_length/2, cap_style=3)): # Check collisions with obstacles in scenario
                     return False # Returns False if collision occurs (not collision free)
             if self.boundary is not None:
                 if object.intersects(self.boundary): # Check collisions with the boundary in scenario
@@ -97,8 +104,14 @@ class Scenario:
         
         # Draw start and goal
         if self.start is not None and self.goal is not None:
-            plt.scatter(self.start.x, self.start.y, s=50, c='g', marker='o', label='Start')
-            plt.scatter(self.goal.x, self.goal.y, s=60, c='r', marker='*', label='Goal')
+            if self.vehicle_length != 0 and self.vehicle_width != 0: # If the vehicle size has been set, draw start and goal as vehicle
+                ax.add_patch(matplotlib.patches.Rectangle((self.start[0].x - self.vehicle_length / 2, self.start[0].y - self.vehicle_width / 2),
+                                                            self.vehicle_length, self.vehicle_width, self.start[1], color='red', alpha=0.8, label='Start'))
+                ax.add_patch(matplotlib.patches.Rectangle((self.goal[0].x - self.vehicle_length / 2, self.goal[0].y - self.vehicle_width / 2), 
+                                                            self.vehicle_length, self.vehicle_width, self.goal[1], color='green', alpha=0.8, label='Goal'))
+            else: # Draw start and goal as points
+                plt.scatter(self.start[0].x, self.start[0].y, s=50, c='g', marker='o', label='Start')
+                plt.scatter(self.goal[0].x, self.goal[0].y, s=60, c='r', marker='*', label='Goal')
 
         # Draw boundary, if it exists
         if self.boundary is not None:
@@ -109,7 +122,6 @@ class Scenario:
             for path in self.path:
                 plt.plot(*path.xy, c='tab:blue', alpha=0.4)
                 
-
         # Draw all trees if it plot_all_trees is True
         if plot_all_trees:
             for path in self.path:
