@@ -102,6 +102,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, goal_prob=0.
         # RRT* is done
         print(f"\nRRT* finished within {n+1} iterations")
         return
+        
     else: # If it does not converge, there will be no Nodes near the goal
         if force_plot_tree: # Force plot the tree, regardless whether it converges
             print("Force plotted the entire tree, convergence not guaranteed")

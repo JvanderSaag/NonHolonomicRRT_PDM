@@ -5,9 +5,10 @@
 import shapely.geometry
 import matplotlib.pyplot as plt
 import matplotlib.patches
+import numpy as np
 
 class Scenario:
-    def __init__(self, env_width, env_height, curve_radius, boundary_collision=False):
+    def __init__(self, env_width, env_height, boundary_collision=False):
         # Set width and height
         self.width = env_width
         self.height = env_height
@@ -22,13 +23,9 @@ class Scenario:
         else:
             self.boundary = None # Else None boundary
         
-        # Initialise size of vehicle to zero
-        self.vehicle_length, self.vehicle_width = 0, 0
-
-        # Initialise the curvature radiuses of the vehicule
-        self.curve_radius = curve_radius
+        # Initialise size and curvature radius of vehicle to zero
+        self.vehicle_length, self.vehicle_width, self.curve_radius = 0, 0, 0
         pass
-
 
     def set_start_goal(self, start, yaw_start, goal, yaw_goal):
         # Set start and goal, and assert datatype is correct
@@ -36,28 +33,27 @@ class Scenario:
         self.start, self.goal = (start, yaw_start), (goal, yaw_goal)
         pass
 
-
     def set_obstacles(self, obstacles):
         # Set list of obstacles, and assert datatype is correct
         assert all(isinstance(x, shapely.geometry.Polygon) for x in obstacles), "AssertError: Obstacles are not polygons!" 
         self.obstacles = obstacles # define obstacles as list of shapely objects
         pass
-    
 
     def set_path(self, path):
         # Include path from motion planner into scenario class
         self.path = path
         pass
 
-    
     def set_totaltree(self, tree):
         self.total_tree = tree
         pass 
     
     # set vehicle size to be used for Buffer around obstacles
-    def set_vehicle(self, length, width):
+    def set_vehicle(self, curve_radius, length=0, width=0):
+        self.curve_radius = np.linspace(0, curve_radius, 6).tolist()
         self.vehicle_length = length
         self.vehicle_width = width
+        pass
 
     def collision_free(self, object): # Check if given path/points object from RRT is collision_free
         try: # Object can be any shapely object (point, line or polygon)
@@ -89,10 +85,8 @@ class Scenario:
 
         return obstacle_coords, path_coords, self.start.coords[:][0], self.goal.coords[:][0]
 
-
     def return_scenariosize(self): # Returns size of environment (width, height)
         return (self.width, self.height)
-
 
     def plot_scenario(self, plot_all_trees=False): # Plot the scenario in matplotlib
         fig, ax = plt.subplots()
