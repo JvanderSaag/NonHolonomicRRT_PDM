@@ -5,7 +5,7 @@
 import numpy as np
 from shapely.geometry import Point, LineString
 from tqdm import tqdm
-from Reeds_Shepp_Curves import reeds_shepp_path_planning
+from bin.Reeds_Shepp_Curves import reeds_shepp_path_planning
 
 class TreeNode: # Tree Node class that RRT uses
     def __init__(self, point, yaw):
