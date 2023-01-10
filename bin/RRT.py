@@ -30,9 +30,9 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
             sampled_Node = TreeNode(rand_coords(scenario.width, scenario.height), np.deg2rad(np.random.randint(-180, 180,1)))
             # Random chance to orient point to goal, only if sampled point is not the goal
             if not sampled_Node.point.equals(goal_Node.point) and np.random.random_sample() < 0.05:
-                angle_to_goal = np.degrees(np.arctan((goal_Node.point.y - sampled_Node.y) / (goal_Node.point.x - sampled_Node.x))) + 180
+                angle_to_goal = np.degrees(np.arctan((goal_Node.point.y - sampled_Node.point.y) / (goal_Node.point.x - sampled_Node.point.x))) + 180
                 sampled_Node = sampled_Node.yaw = angle_to_goal
-                
+
         # If the sampled point collides with obstacles
         if not scenario.collision_free(sampled_Node.point):
             continue # Continue to next iteration
