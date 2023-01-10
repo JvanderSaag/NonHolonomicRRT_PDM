@@ -82,32 +82,34 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, goal_prob=0.
 
                 print(f"\nRRT finished within {n} iterations")
                 return
-
-    # Force plot the tree, regardless whether it converges
-    if force_plot_tree:
-        return scenario.set_totaltree(extract_all_edges(start_Node))
-
-    # If it does not converge, there will be no Nodes near the goal
+    
+    # Find the nodes near the goal
     Nodes_near_goal = find_nearby_nodes(start_Node, goal_Node, dist_tolerance)
-    if not Nodes_near_goal:
+
+    if Nodes_near_goal:
+        # Else RRT* has found a path, find the shortest one if there are several
+        Node_min_cost = min(Nodes_near_goal, key=lambda x: x.cost)
+        shortest_path = extract_path(Node_min_cost)
+
+        # Finally set final path and 'total' tree containing all edges
+        final_path = shortest_path 
+        total_tree = extract_all_edges(start_Node)
+
+        # Update class attributes
+        scenario.set_path(final_path)
+        scenario.set_totaltree(total_tree)
+
+        # RRT* is done
+        print(f"\nRRT* finished within {n+1} iterations")
+        return
+    else: # If it does not converge, there will be no Nodes near the goal
+        if force_plot_tree: # Force plot the tree, regardless whether it converges
+            print("Force plotted the entire tree, convergence not guaranteed")
+            scenario.set_totaltree(extract_all_edges(start_Node))
+            return 
+        # Raise exception if not force plotting
         raise Exception("\nRRT could not find a suitable path within the given number of iterations. Please try again.\nIf it consistently fails to complete, increase the number of iterations.")
     
-    # Else RRT* has found a path, find the shortest one if there are several
-    Node_min_cost = min(Nodes_near_goal, key=lambda x: x.cost)
-    shortest_path = extract_path(Node_min_cost)
-    
-    # Finally set final path and 'total' tree containing all edges
-    final_path = shortest_path 
-    total_tree = extract_all_edges(start_Node)
-
-    # Update class attributes
-    scenario.set_path(final_path)
-    scenario.set_totaltree(total_tree)
-    
-    # RRT* is done
-    print(f"\nRRT* finished within {n+1} iterations")
-    return
-
 
 def rand_coords(width, height): # Generate random coordinates within bounds of environment
     x = np.random.randint(0,width*100,1) / 100
