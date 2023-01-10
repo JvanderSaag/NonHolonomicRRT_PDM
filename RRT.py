@@ -8,7 +8,7 @@ from tqdm import tqdm
 from Reeds_Shepp_Curves import reeds_shepp_path_planning
 
 class TreeNode: # Tree Node class that RRT uses
-    def __init__(self, point, yaw):
+    def __init__(self, point, yaw=None):
         self.point = point # This should be shapely PointObject, containing coordinate informatioj
         self.yaw = yaw # Orientation of vehicle
 

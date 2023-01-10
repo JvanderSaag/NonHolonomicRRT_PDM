@@ -315,7 +315,9 @@ def calc_paths(sx, sy, syaw, gx, gy, gyaw, maxc, step_size, backwards):
 
 
 def reeds_shepp_path_planning(sx, sy, syaw, gx, gy, gyaw, maxc, step_size=0.2, backwards=True):
-    paths = calc_paths(sx, sy, syaw, gx, gy, gyaw, maxc, step_size, backwards)
+    paths = []
+    for curve_rate in maxc:
+        paths += calc_paths(sx, sy, syaw, gx, gy, gyaw, curve_rate, step_size, backwards)
     if paths is None:
         return None, None, None, None, None  # could not generate any path
 
