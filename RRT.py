@@ -8,7 +8,7 @@ from tqdm import tqdm
 from Reeds_Shepp_Curves import reeds_shepp_path_planning
 
 class TreeNode: # Tree Node class that RRT uses
-    def __init__(self, point, yaw=None):
+    def __init__(self, point, yaw):
         self.point = point # This should be shapely PointObject, containing coordinate informatioj
         self.yaw = yaw # Orientation of vehicle
 
@@ -18,9 +18,10 @@ class TreeNode: # Tree Node class that RRT uses
         self.children = [] # Children, only used to draw the entire RRT tree
 
 
-def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, goal_prob=0.05, star=True, non_holonomic=True): # RRT using TreeNodes
+## RRT/ RRT* implementation for global motion planner ##
+def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, goal_prob=0.05, star=True, non_holonomic=True, force_plot_tree=False):
     # Initialise start and goal node
-    start_Node, goal_Node = TreeNode(scenario.start, 0), TreeNode(scenario.goal, 0)
+    start_Node, goal_Node = TreeNode(scenario.start[0], scenario.start[1]), TreeNode(scenario.goal[0], scenario.goal[1])
 
     for n in tqdm(range(N_iter)): # Max N_iter iterations
         if np.random.random_sample() < goal_prob: # Have a chance of picking the goal node as the sampled node
@@ -28,7 +29,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, goal_prob=0.
         else:  # Otherwise, randomly sample a point in the environment
             sampled_Node = TreeNode(Point(rand_coords(scenario.width, scenario.height)), np.deg2rad(np.random.randint(-180,180,1)))
 
-         # If the sampled point collides with obstacles
+        # If the sampled point collides with obstacles
         if not scenario.collision_free(sampled_Node.point):
             continue # Continue to next iteration
 
@@ -82,6 +83,10 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, goal_prob=0.
                 print(f"\nRRT finished within {n} iterations")
                 return
 
+    # Force plot the tree, regardless whether it converges
+    if force_plot_tree:
+        return scenario.set_totaltree(extract_all_edges(start_Node))
+
     # If it does not converge, there will be no Nodes near the goal
     Nodes_near_goal = find_nearby_nodes(start_Node, goal_Node, dist_tolerance)
     if not Nodes_near_goal:
@@ -93,7 +98,6 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, goal_prob=0.
     
     # Finally set final path and 'total' tree containing all edges
     final_path = shortest_path 
-
     total_tree = extract_all_edges(start_Node)
 
     # Update class attributes
@@ -118,27 +122,26 @@ def find_closest_Node(scenario, start_Node, new_Node, non_holonomic, min_length=
     if start_Node.children: # If Node has children
         for child in start_Node.children: # Iterate over the children nodes
             temp_Node, temp_path, temp_length = find_closest_Node(scenario, child, new_Node, non_holonomic, min_length=min_length)
-            if temp_Node is None:
-                return nearest_Node, shortest_path, min_length
+            if temp_Node is None: # If the node does not exist
+                return nearest_Node, shortest_path, min_length # Return current best Node and path
             if temp_length < min_length:
                 nearest_Node, shortest_path, min_length = temp_Node, temp_path, temp_length
     
     # Either there are no children, or the recursive search is done (following code will be reached) #
-    # CONNECTOR FUNCTION #
-    connect_line = create_connector(start_Node, new_Node, scenario, non_holonomic) # Create a line that connects to the new Node
-    if connect_line is None:
-        return nearest_Node, shortest_path, min_length
-    
-    # COLLISION CHECK #
-    if scenario.collision_free(connect_line): # If the line does not collide with the environment
-        length = connect_line.length # Find length of connecting line
 
-        # If this length is less than the saved min
-        if length < min_length:
-            nearest_Node = start_Node # set nearest node
-            shortest_path = connect_line # define the shortest path
-            min_length = length # then update minimum length
-       
+    # Create connector that connects the two Nodes, returns None if the connector collides with environment
+    connect_line = create_connector(start_Node, new_Node, scenario, non_holonomic)
+    if connect_line is None:
+        return nearest_Node, shortest_path, min_length # Return current best Nodes and path
+    
+    length = connect_line.length # Find length of connecting line
+
+    # If this length is less than the saved min, we can once again update the nearest node
+    if length < min_length:
+        nearest_Node = start_Node # set nearest node
+        shortest_path = connect_line # define the shortest path
+        min_length = length # then update minimum length
+    
     return nearest_Node, shortest_path, min_length
 
 
@@ -167,14 +170,18 @@ def extract_path(final_Node, path=[]): # Extract only final path from tree
 
 
 def create_connector(Node1, Node2, scenario, non_holonomic=True):
+    # If linear connectors are desired, non_holonomic can be set to False
     if not non_holonomic:
         return LineString([Node1.point, Node2.point])
-    maxc = 0.3
-    sx, sy, syaw = Node1.point.x, Node1.point.y , Node1.yaw
-    gx, gy, gyaw = Node2.point.x, Node2.point.y, Node2.yaw
-    connect_line_list = reeds_shepp_path_planning(sx, sy, syaw, gx, gy, gyaw, maxc, step_size=0.2)
-    if connect_line_list is not None:
+
+    maxc = 0.3 # Turning radius
+    sx, sy, syaw = Node1.point.x, Node1.point.y , Node1.yaw # Coordinates and orientation of Node 1
+    gx, gy, gyaw = Node2.point.x, Node2.point.y, Node2.yaw # Coordinates and orientatio of Node 2
+    
+    # Return list of possible connecting curves from Reeds-Schepp
+    connect_line_list = reeds_shepp_path_planning(sx, sy, syaw, gx, gy, gyaw, maxc, step_size=0.2) 
+    if connect_line_list is not None: # If list is not empty
         for connect_line in connect_line_list:
             if scenario.collision_free(connect_line): # If the line does not collide with the environment
                 return connect_line
-    return None
+    return None # If it does collide with the environment, return None
