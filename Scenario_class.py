@@ -27,7 +27,6 @@ class Scenario:
 
         # Initialise the curvature radiuses of the vehicle
         self.curve_radius = curve_radius
-        
         pass
 
 
