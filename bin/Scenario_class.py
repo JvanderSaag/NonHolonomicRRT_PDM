@@ -141,30 +141,30 @@ class Scenario:
         plt.show()
         pass
     
-    def write_csv(self, name):
-        path_coord = np.array(self.return_path_coords()).T
-        dataframe = pd.DataFrame({'x_coord': path_coord[0], 'y_coord':path_coord[1], 'yaw':path_coord[2]})
-        if find(f'{self.name}_Path_{name}'):
-            print("this file already exists are you sure you want to overwrite it?(y/n)")
+    def write_csv(self, name): # Function to write csv file
+        path_coord = np.array(self.return_path_coords()).T # Obtain the x, y coordinates and yaw of each point
+        dataframe = pd.DataFrame({'x_coord': path_coord[0], 'y_coord':path_coord[1], 'yaw':path_coord[2]}) # create a panda dataframe
+        if find(f'{self.name}_Path_{name}'): # Check if file to be saved already exists
+            print("this file already exists are you sure you want to overwrite it?(y/n)") # ask if file should be overwritten
             validation = input()
-            if validation == 'y':
+            if validation == 'y': # Overwrite file
                 print('file overwritten')
                 dataframe.to_csv(f"./Saved_scenarios/{self.name}_Path_{name}")
-            else:
+            else: # Dont overwrite file
                 print('file not saved')
-        else:
+        else: # Save file if it doesnt exist
             dataframe.to_csv(f"./Saved_scenarios/{self.name}_Path_{name}")
             print('file saved')
 
-    def read_csv(self, name, set_path=False):
-        dataset = pd.read_csv(f"./Saved_scenarios/{self.name}_Path_{name}", index_col=[0])
+    def read_csv(self, name, set_path=False): # Read csv file if set_path is true the path of the scenario will be set from the csv data
+        dataset = pd.read_csv(f"./Saved_scenarios/{self.name}_Path_{name}", index_col=[0]) # Obtain pandas dataframe from csv
         x, y, yaw = dataset['x_coord'], dataset['y_coord'], dataset['yaw']
-        if set_path:
+        if set_path: # If the path was to be set from csv 
             coord = np.array([x,y]).T
-            self.path = [shapely.geometry.LineString(coord)]
-        return x, y, yaw
+            self.path = [shapely.geometry.LineString(coord)] # Create path with shapely object
+        return x, y, yaw # return csv data in lists
 
-def find(name):
+def find(name): # function used to find file in saved scenario folder
     for root, dirs, files in os.walk('./Saved_scenarios'):
         if name in files:
-            return True
+            return True # Returns True if file exists
