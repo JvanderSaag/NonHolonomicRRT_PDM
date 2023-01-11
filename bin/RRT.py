@@ -8,7 +8,6 @@ from tqdm import tqdm
 from bin.Reeds_Shepp_Curves import reeds_shepp_path_planning
 from bin.dubins_path_planner import plan_dubins_path
 
-
 class TreeNode: # Tree Node class that RRT uses
     def __init__(self, point, yaw):
         self.point = point # This should be shapely PointObject, containing coordinate informatioj
@@ -26,13 +25,16 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
     start_Node, goal_Node = TreeNode(scenario.start[0], scenario.start[1]), TreeNode(scenario.goal[0], scenario.goal[1])
 
     for n in tqdm(range(N_iter)): # Max N_iter iterations
-        if np.random.random_sample() < 0.05: # Have a chance of picking the goal node as the sampled node
+        if star and n > N_iter - 5: # For RRT*, pick the goal node as the last few nodes to improve convergence chances
+            sampled_Node = goal_Node
+        elif not star and np.random.random_sample() < 0.05: # For normal RRT, have a chance of picking the goal node as the sampled node
             sampled_Node = goal_Node
         else:  # Otherwise, randomly sample a point in the environment
-            sampled_Node = TreeNode(rand_coords(scenario.width, scenario.height), np.deg2rad(np.random.randint(-180, 180,1))[0])
+            sampled_Node = TreeNode(rand_coords(scenario.width, scenario.height), np.deg2rad(np.random.randint(0, 360,1)))
+           
             # Random chance to orient point to goal, only if sampled point is not the goal
             if not sampled_Node.point.equals(goal_Node.point) and np.random.random_sample() < 0.05:
-                angle_to_goal = np.degrees(np.arctan((goal_Node.point.y - sampled_Node.point.y) / (goal_Node.point.x - sampled_Node.point.x))) + 180
+                angle_to_goal = (np.degrees(np.arctan2((goal_Node.point.y - sampled_Node.point.y), (goal_Node.point.x - sampled_Node.point.x))) + 360) % 360
                 sampled_Node.yaw = angle_to_goal
 
         # If the sampled point collides with obstacles
@@ -52,34 +54,56 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
                         
             # Update the sampled_Node cost
             sampled_Node.cost = parent_Node.cost + path_to_parent.length 
-            if star: # If RRT* is used, the tree will be redrawn
-                # Within a certain radius, find nearby points
-                radius = 10
+
+            if star: # If RRT* is used, the sampled Node will be connected to the best nearby node
+                radius = 10  # Within a certain radius, find nearby points
                 Nodes_near_sample = find_nearby_nodes(start_Node, sampled_Node, radius, nearby_Nodes=[])
 
                 if Nodes_near_sample: # If there are nearby nodes
                     min_cost = sampled_Node.cost # First set the upper bound of cost (current cost of sampled Node)
                     
-                    for node in Nodes_near_sample: # For each nearby node
+                    for node in Nodes_near_sample: # For each nearby node, check if it is better to connect the sampled node to it
                         # Estimate cost by using distance and difference in angle, avoids redrawing new connectors for each node
                         cost_estimate = sampled_Node.point.distance(node.point) + min(abs(sampled_Node.yaw - node.yaw), 360 - abs(sampled_Node.yaw - node.yaw))
                         cost_via_node = node.cost + cost_estimate
 
-                        if cost_via_node < min_cost: # If this cost is less, update the parent Node
-                            parent_Node, min_cost = node, cost_via_node
-                            sampled_Node.cost = min_cost
-
+                        if cost_via_node < min_cost: # If this cost is less, update the parent Node and min cost
+                            parent_Node, min_cost = node, cost_via_node 
+    
             # Create the path to parent and check if it is collision-free
-            path_to_parent = create_connector(parent_Node, sampled_Node, scenario, non_holonomic, backwards) # NEW CONNETOR FUNCTION
+            path_to_parent = create_connector(parent_Node, sampled_Node, scenario, non_holonomic, backwards)
             if path_to_parent is None:
                 continue
-            if not scenario.collision_free(path_to_parent):
-                continue # If it collides, continue to next iteration
+
+            # Update the sampled_Node cost, in case there is a new path generated
+            sampled_Node.cost = parent_Node.cost + path_to_parent.length 
 
             # Update parent node with children, and sampled Node with parent
             parent_Node.children.append(sampled_Node)
             sampled_Node.parent = parent_Node 
             sampled_Node.path_to_parent = path_to_parent
+
+            # Rewiring the tree for RRT*, connect surrounding nodes to new sampled node if it is better
+            if star and Nodes_near_sample: 
+                for node in Nodes_near_sample: 
+                    cost_estimate = sampled_Node.point.distance(node.point) + min(abs(sampled_Node.yaw - node.yaw), 360 - abs(sampled_Node.yaw - node.yaw))
+                    cost_via_sampled_Node = sampled_Node.cost + cost_estimate # Estimate the cost to go via the sampled_Node
+
+                    if cost_via_sampled_Node < node.cost: # The node is expected to have a lower cost if it is rewired to the sampled_Node
+                        # Create a path from sampled_Node to node
+                        path_to_node = create_connector(sampled_Node, node, scenario, non_holonomic, backwards)
+                        if path_to_node is None: # if the path cannot be found or it collides with environment
+                            continue # continue to next node
+
+                        node_updated_cost = sampled_Node.cost + path_to_node.length # Get the new cost
+                        if node_updated_cost < node.cost: # If the new path is indeed better
+                            node.parent.children.remove(node) # Firstly destroy the parent connection of the node
+                            node.parent = sampled_Node # Then update the node with its new parent (sampled node)
+                            node.path_to_parent = path_to_node
+                            sampled_Node.children.append(node) # add node as child of sampled_Node
+
+                            node_cost_difference = node.cost - node_updated_cost # Find the cost difference
+                            update_children_cost(node, node_cost_difference) # Update children with new cost
 
             # Early stop if normal RRT is used, as once the goal is reached the path won't change
             if not star and sampled_Node.point.distance(goal_Node.point) < dist_tolerance:
@@ -98,7 +122,6 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
 
     if Nodes_near_goal:
         # Else RRT* has found a path, find the shortest one if there are several
-        #cost_estimate = sampled_Node.point.distance(node.point) + min(abs(sampled_Node.yaw - node.yaw), 360 - abs(sampled_Node.yaw - node.yaw))
         Node_min_cost = min(Nodes_near_goal, key=lambda x: (x.cost) * (goal_Node.point.distance(x.point) + min(abs(goal_Node.yaw - x.yaw), 360 - abs(goal_Node.yaw - x.yaw))))
         shortest_path = extract_path(Node_min_cost)
 
@@ -174,6 +197,13 @@ def find_nearby_nodes(start_Node, goal_Node, tol, nearby_Nodes=[]): # Find Nodes
                 nearby_Nodes.append(child) # Add the node to the nearby_Nodes list
             find_nearby_nodes(child, goal_Node, tol, nearby_Nodes) # Recursively repeat over all its children
     return nearby_Nodes
+
+
+def update_children_cost(start_Node, cost_difference):
+    if start_Node.children: # Iterate over all the children of the start_Node
+        for child in start_Node.children: # For each child
+            child.cost = child.cost - cost_difference # Update the cost of the child
+    return
 
 
 def extract_path(final_Node, path=[]): # Extract only final path from tree
