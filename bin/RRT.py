@@ -6,6 +6,8 @@ import numpy as np
 from shapely.geometry import Point, LineString
 from tqdm import tqdm
 from bin.Reeds_Shepp_Curves import reeds_shepp_path_planning
+from bin.dubins_path_planner import plan_dubins_path
+
 
 class TreeNode: # Tree Node class that RRT uses
     def __init__(self, point, yaw):
@@ -19,7 +21,7 @@ class TreeNode: # Tree Node class that RRT uses
 
 
 ## RRT/ RRT* implementation for global motion planner ##
-def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, non_holonomic=True, force_plot_tree=False):
+def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, non_holonomic=True, force_plot_tree=False, backwards=True):
     # Initialise start and goal node
     start_Node, goal_Node = TreeNode(scenario.start[0], scenario.start[1]), TreeNode(scenario.goal[0], scenario.goal[1])
 
@@ -27,7 +29,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
         if np.random.random_sample() < 0.05: # Have a chance of picking the goal node as the sampled node
             sampled_Node = goal_Node
         else:  # Otherwise, randomly sample a point in the environment
-            sampled_Node = TreeNode(rand_coords(scenario.width, scenario.height), np.deg2rad(np.random.randint(-180, 180,1)))
+            sampled_Node = TreeNode(rand_coords(scenario.width, scenario.height), np.deg2rad(np.random.randint(-180, 180,1))[0])
             # Random chance to orient point to goal, only if sampled point is not the goal
             if not sampled_Node.point.equals(goal_Node.point) and np.random.random_sample() < 0.05:
                 angle_to_goal = np.degrees(np.arctan((goal_Node.point.y - sampled_Node.point.y) / (goal_Node.point.x - sampled_Node.point.x))) + 180
@@ -38,7 +40,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
             continue # Continue to next iteration
 
         # Find the closest node to sampled point
-        parent_Node, path_to_parent, _ = find_closest_Node(scenario, start_Node, sampled_Node, non_holonomic)
+        parent_Node, path_to_parent, _ = find_closest_Node(scenario, start_Node, sampled_Node, non_holonomic, backwards)
 
         if parent_Node is not None and not parent_Node.point.equals(sampled_Node.point):  # If a nearest node is found     
             if path_to_parent.length > step_size: # In the case that this parent node is not within the step size
@@ -68,7 +70,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
                             sampled_Node.cost = min_cost
 
             # Create the path to parent and check if it is collision-free
-            path_to_parent = create_connector(parent_Node, sampled_Node, scenario, non_holonomic) # NEW CONNETOR FUNCTION
+            path_to_parent = create_connector(parent_Node, sampled_Node, scenario, non_holonomic, backwards) # NEW CONNETOR FUNCTION
             if path_to_parent is None:
                 continue
             if not scenario.collision_free(path_to_parent):
@@ -127,13 +129,13 @@ def rand_coords(width, height): # Generate random coordinates within bounds of e
     return Point(x, y)
 
 
-def find_closest_Node(scenario, start_Node, new_Node, non_holonomic, min_length=float('inf')): # Find closest Node in Tree
+def find_closest_Node(scenario, start_Node, new_Node, non_holonomic, backwards, min_length=float('inf')): # Find closest Node in Tree
     nearest_Node, shortest_path = None, None # Initalise nearest Node and shortest path as None
 
     # Recursively check all children
     if start_Node.children: # If Node has children
         for child in start_Node.children: # Iterate over the children nodes
-            temp_Node, temp_path, temp_length = find_closest_Node(scenario, child, new_Node, non_holonomic, min_length=min_length)
+            temp_Node, temp_path, temp_length = find_closest_Node(scenario, child, new_Node, non_holonomic, backwards, min_length=min_length)
             if temp_Node is None: # If the node does not exist
                 return nearest_Node, shortest_path, min_length # Return current best Node and path
             if temp_length < min_length:
@@ -142,7 +144,7 @@ def find_closest_Node(scenario, start_Node, new_Node, non_holonomic, min_length=
     # Either there are no children, or the recursive search is done (following code will be reached) #
 
     # Create connector that connects the two Nodes, returns None if the connector collides with environment
-    connect_line = create_connector(start_Node, new_Node, scenario, non_holonomic)
+    connect_line = create_connector(start_Node, new_Node, scenario, non_holonomic, backwards)
     if connect_line is None:
         return nearest_Node, shortest_path, min_length # Return current best Nodes and path
     
@@ -181,19 +183,27 @@ def extract_path(final_Node, path=[]): # Extract only final path from tree
     return path
 
 
-def create_connector(Node1, Node2, scenario, non_holonomic=True):
+def create_connector(Node1, Node2, scenario, non_holonomic, backwards):
     # If linear connectors are desired, non_holonomic can be set to False
     if not non_holonomic:
         return LineString([Node1.point, Node2.point])
-    
     maxc = scenario.curve_radius # Turning radius
     sx, sy, syaw = Node1.point.x, Node1.point.y , Node1.yaw # Coordinates and orientation of Node 1
     gx, gy, gyaw = Node2.point.x, Node2.point.y, Node2.yaw # Coordinates and orientatio of Node 2
-    
-    # Return list of possible connecting curves from Reeds-Schepp
-    connect_line_list = reeds_shepp_path_planning(sx, sy, syaw, gx, gy, gyaw, maxc)
-    if connect_line_list is not None: # If list is not empty
-        for connect_line in connect_line_list:
-            if scenario.collision_free(connect_line): # If the line does not collide with the environment
-                return connect_line
-    return None # If it does collide with the environment, return None
+    if gx != sx and gy != sy: # Checks both node to connect arent the same node
+        if not backwards:
+            # Return list of possible connecting curves from Reeds-Schepp
+            connect_line_list = plan_dubins_path(sx, sy, syaw, gx, gy, gyaw, maxc)
+            if connect_line_list is not None: # If list is not empty
+                for connect_line in connect_line_list:
+                    if scenario.collision_free(connect_line): # If the line does not collide with the environment
+                        return connect_line
+            return None # If it does collide with the environment, return None
+        else:
+            # Return list of possible connecting curves from Reeds-Schepp
+            connect_line_list = reeds_shepp_path_planning(sx, sy, syaw, gx, gy, gyaw, maxc)
+            if connect_line_list is not None: # If list is not empty
+                for connect_line in connect_line_list:
+                    if scenario.collision_free(connect_line): # If the line does not collide with the environment
+                        return connect_line
+            return None # If it does collide with the environment, return None
