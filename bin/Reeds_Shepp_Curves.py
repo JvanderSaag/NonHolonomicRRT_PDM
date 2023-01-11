@@ -1,6 +1,7 @@
 """
 Reeds Shepp path planner sample code
 author Atsushi Sakai(@Atsushi_twi)
+modified by Hugo Chassagnette
 """
 import math
 from shapely.geometry import LineString
@@ -119,7 +120,7 @@ def left_right_left(x, y, phi):
     return False, 0.0, 0.0, 0.0
 
 
-def curve_curve_curve(x, y, phi, paths, step_size, backwards):
+def curve_curve_curve(x, y, phi, paths, step_size):
     flag, t, u, v = left_right_left(x, y, phi)
     if flag:
         paths = set_path(paths, [t, u, v], ["L", "R", "L"], step_size)
@@ -136,26 +137,26 @@ def curve_curve_curve(x, y, phi, paths, step_size, backwards):
     if flag:
         paths = set_path(paths, [-t, -u, -v], ["R", "L", "R"], step_size)
 
-    if backwards:
-        # backwards
-        xb = x * math.cos(phi) + y * math.sin(phi)
-        yb = x * math.sin(phi) - y * math.cos(phi)
+    
+    # backwards
+    xb = x * math.cos(phi) + y * math.sin(phi)
+    yb = x * math.sin(phi) - y * math.cos(phi)
 
-        flag, t, u, v = left_right_left(xb, yb, phi)
-        if flag:
-            paths = set_path(paths, [v, u, t], ["L", "R", "L"], step_size)
+    flag, t, u, v = left_right_left(xb, yb, phi)
+    if flag:
+        paths = set_path(paths, [v, u, t], ["L", "R", "L"], step_size)
 
-        flag, t, u, v = left_right_left(-xb, yb, -phi)
-        if flag:
-            paths = set_path(paths, [-v, -u, -t], ["L", "R", "L"], step_size)
+    flag, t, u, v = left_right_left(-xb, yb, -phi)
+    if flag:
+        paths = set_path(paths, [-v, -u, -t], ["L", "R", "L"], step_size)
 
-        flag, t, u, v = left_right_left(xb, -yb, -phi)
-        if flag:
-            paths = set_path(paths, [v, u, t], ["R", "L", "R"], step_size)
+    flag, t, u, v = left_right_left(xb, -yb, -phi)
+    if flag:
+        paths = set_path(paths, [v, u, t], ["R", "L", "R"], step_size)
 
-        flag, t, u, v = left_right_left(-xb, -yb, phi)
-        if flag:
-            paths = set_path(paths, [-v, -u, -t], ["R", "L", "R"], step_size)
+    flag, t, u, v = left_right_left(-xb, -yb, phi)
+    if flag:
+        paths = set_path(paths, [-v, -u, -t], ["R", "L", "R"], step_size)
 
     return paths
 
@@ -211,7 +212,7 @@ def left_straight_right(x, y, phi):
     return False, 0.0, 0.0, 0.0
 
 
-def generate_path(q0, q1, max_curvature, step_size, backwards):
+def generate_path(q0, q1, max_curvature, step_size):
     dx = q1[0] - q0[0]
     dy = q1[1] - q0[1]
     dth = q1[2] - q0[2]
@@ -223,15 +224,15 @@ def generate_path(q0, q1, max_curvature, step_size, backwards):
     paths = []
     paths = straight_curve_straight(x, y, dth, paths, step_size)
     paths = curve_straight_curve(x, y, dth, paths, step_size)
-    paths = curve_curve_curve(x, y, dth, paths, step_size, backwards)
+    paths = curve_curve_curve(x, y, dth, paths, step_size)
 
     return paths
 
 
-def calc_interpolate_dists_list(lengths, step_size):
+def calc_interpolate_dists_list(lengths, step):
     interpolate_dists_list = []
     for length in lengths:
-        d_dist = step_size if length >= 0.0 else -step_size
+        d_dist = step if length >= 0.0 else -step
         interp_dists = np.arange(0.0, length, d_dist)
         interp_dists = np.append(interp_dists, length)
         interpolate_dists_list.append(interp_dists)
@@ -239,8 +240,8 @@ def calc_interpolate_dists_list(lengths, step_size):
     return interpolate_dists_list
 
 
-def generate_local_course(lengths, modes, max_curvature, step_size):
-    interpolate_dists_list = calc_interpolate_dists_list(lengths, step_size)
+def generate_local_course(lengths, modes, max_curvature, step):
+    interpolate_dists_list = calc_interpolate_dists_list(lengths, step)
 
     origin_x, origin_y, origin_yaw = 0.0, 0.0, 0.0
 
@@ -291,15 +292,15 @@ def pi_2_pi(angle):
     return (angle + math.pi) % (2 * math.pi) - math.pi
 
 
-def calc_paths(sx, sy, syaw, gx, gy, gyaw, maxc, step_size, backwards):
+def calc_paths(sx, sy, syaw, gx, gy, gyaw, maxc, step):
     q0 = [sx, sy, syaw]
     q1 = [gx, gy, gyaw]
 
-    paths = generate_path(q0, q1, maxc, step_size, backwards)
+    paths = generate_path(q0, q1, maxc, step)
     for path in paths:
         xs, ys, yaws, directions = generate_local_course(path.lengths,
                                                          path.ctypes, maxc,
-                                                         step_size * maxc)
+                                                         step * maxc)
 
         # convert global coordinate
         path.x = [math.cos(-q0[2]) * ix + math.sin(-q0[2]) * iy + q0[0] for
@@ -314,12 +315,12 @@ def calc_paths(sx, sy, syaw, gx, gy, gyaw, maxc, step_size, backwards):
     return paths
 
 
-def reeds_shepp_path_planning(sx, sy, syaw, gx, gy, gyaw, maxc, step_size=0.2, backwards=True):
+def reeds_shepp_path_planning(sx, sy, syaw, gx, gy, gyaw, maxc, step=0.2):
     paths = []
     for curve_rate in maxc:
-        paths += calc_paths(sx, sy, syaw, gx, gy, gyaw, curve_rate, step_size, backwards)
+        paths += calc_paths(sx, sy, syaw, gx, gy, gyaw, curve_rate, step)
     if paths is None:
-        return None, None, None, None, None  # could not generate any path
+        return None # could not generate any path
 
     # search minimum cost path
     linestring_list = []
