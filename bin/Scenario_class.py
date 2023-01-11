@@ -76,8 +76,17 @@ class Scenario:
         # Get the coordinats of the path, return
         path_coords = []
         for segment in self.path[::-1]:
-            for coord in segment.coords[:-1]: # Exclude last coordinate, same as first one of next segment
-                path_coords.append((round(coord[0], 3), round(coord[1], 3))) # Round coordinates to 3 dec places
+            x, y = np.array(list(zip(*segment.coords))[0]),np.array(list(zip(*segment.coords))[1]) # Get x and y values from linestring segment
+            #np.seterr(divide='ignore') # Ignore warnings, NaN values get handled later
+            yaw = (np.degrees(np.arctan2(np.diff(y), np.diff(x))) + 360) % 360 # Find yaw / derivative
+            
+            # # Replace NaN values with nearest yaw
+            # ind = np.where(~np.isnan(yaw))[0]
+            # yaw[:ind[0]] = yaw[ind[0]]
+            # yaw[ind[1] + 1:] = yaw[ind[-1]]
+
+            for idx, coord in enumerate(segment.coords[:-1]): # Exclude last coordinate, same as first one of next segment
+                path_coords.append((round(coord[0], 3), round(coord[1], 3), round(yaw[idx], 3))) # Round coordinates to 3 dec places 
         return path_coords
 
     # Return coordinates of obstacles, start and goal in that order
