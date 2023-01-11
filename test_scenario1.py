@@ -16,5 +16,8 @@ simple_Scenario.set_obstacles(obstacles)
 simple_Scenario.set_start_goal(start, start_yaw, goal, goal_yaw)
 simple_Scenario.set_vehicle(0.6)
 
-RRT(1000, simple_Scenario)
+#RRT(1000, simple_Scenario, star=False, backwards=True)
+
+#simple_Scenario.write_csv('test1')
+simple_Scenario.read_csv('test1', set_path=True)
 simple_Scenario.plot_scenario()
