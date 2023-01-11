@@ -6,9 +6,14 @@ import shapely.geometry
 import matplotlib.pyplot as plt
 import matplotlib.patches
 import numpy as np
+import pandas as pd
+import os
 
 class Scenario:
-    def __init__(self, env_width, env_height, boundary_collision=False):
+    def __init__(self, name, env_width, env_height, boundary_collision=False):
+        # Set the name of the scenario:
+        self.name = name
+
         # Set width and height
         self.width = env_width
         self.height = env_height
@@ -42,7 +47,7 @@ class Scenario:
     def set_path(self, path):
         # Include path from motion planner into scenario class
         self.path = path
-        pass
+
 
     def set_totaltree(self, tree):
         self.total_tree = tree
@@ -77,14 +82,7 @@ class Scenario:
         path_coords = []
         for segment in self.path[::-1]:
             x, y = np.array(list(zip(*segment.coords))[0]),np.array(list(zip(*segment.coords))[1]) # Get x and y values from linestring segment
-            #np.seterr(divide='ignore') # Ignore warnings, NaN values get handled later
             yaw = (np.degrees(np.arctan2(np.diff(y), np.diff(x))) + 360) % 360 # Find yaw / derivative
-            
-            # # Replace NaN values with nearest yaw
-            # ind = np.where(~np.isnan(yaw))[0]
-            # yaw[:ind[0]] = yaw[ind[0]]
-            # yaw[ind[1] + 1:] = yaw[ind[-1]]
-
             for idx, coord in enumerate(segment.coords[:-1]): # Exclude last coordinate, same as first one of next segment
                 path_coords.append((round(coord[0], 3), round(coord[1], 3), round(yaw[idx], 3))) # Round coordinates to 3 dec places 
         return path_coords
@@ -96,8 +94,7 @@ class Scenario:
         obstacle_coords = []
         for obstacle in self.obstacles:
             obstacle_coords.append(obstacle.exterior.coords[:])
-
-        return obstacle_coords, self.start.coords[:][0], self.goal.coords[:][0]
+        return obstacle_coords, self.start[0], self.goal[0]
 
     def return_scenariosize(self): # Returns size of environment (width, height)
         return (self.width, self.height)
@@ -143,3 +140,31 @@ class Scenario:
         plt.legend()
         plt.show()
         pass
+    
+    def write_csv(self, name):
+        path_coord = np.array(self.return_path_coords()).T
+        dataframe = pd.DataFrame({'x_coord': path_coord[0], 'y_coord':path_coord[1], 'yaw':path_coord[2]})
+        if find(f'{self.name}_Path_{name}'):
+            print("this file already exists are you sure you want to overwrite it?(y/n)")
+            validation = input()
+            if validation == 'y':
+                print('file overwritten')
+                dataframe.to_csv(f"./Saved_scenarios/{self.name}_Path_{name}")
+            else:
+                print('file not saved')
+        else:
+            dataframe.to_csv(f"./Saved_scenarios/{self.name}_Path_{name}")
+            print('file saved')
+
+    def read_csv(self, name, set_path=False):
+        dataset = pd.read_csv(f"./Saved_scenarios/{self.name}_Path_{name}", index_col=[0])
+        x, y, yaw = dataset['x_coord'], dataset['y_coord'], dataset['yaw']
+        if set_path:
+            coord = np.array([x,y]).T
+            self.path = [shapely.geometry.LineString(coord)]
+        return x, y, yaw
+
+def find(name):
+    for root, dirs, files in os.walk('./Saved_scenarios'):
+        if name in files:
+            return True
