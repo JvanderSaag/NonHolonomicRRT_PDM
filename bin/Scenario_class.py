@@ -49,8 +49,8 @@ class Scenario:
         pass 
     
     # set vehicle size to be used for Buffer around obstacles
-    def set_vehicle(self, curve_radius, length=0, width=0):
-        self.curve_radius = np.linspace(0.1, curve_radius, 6).tolist()
+    def set_vehicle(self, max_curve_radius, length=0, width=0):
+        self.curve_radius = np.linspace(0.1, max_curve_radius, 6).tolist()
         self.vehicle_length = length
         self.vehicle_width = width
         pass
@@ -70,20 +70,25 @@ class Scenario:
             print("AttributeError: The object is not a shapely object (Point, LineString, Polygon etc.)")
         pass
     
-    # Return coordinates of obstacles, path, start and goal in that order
+    # Return coordinates of path
     # Coordinate system is x, y starting from bottom left
-    def return_coordinates(self):
+    def return_path_coords(self):
+        # Get the coordinats of the path, return
+        path_coords = []
+        for segment in self.path[::-1]:
+            for coord in segment.coords[:-1]: # Exclude last coordinate, same as first one of next segment
+                path_coords.append((round(coord[0], 3), round(coord[1], 3))) # Round coordinates to 3 dec places
+        return path_coords
+
+    # Return coordinates of obstacles, start and goal in that order
+    # Coordinate system is x, y starting from bottom left
+    def return_env_coords(self):
         # Get obstacle coordinates, a list of lists, where each nested list represents the exterior bounds of one obstacle
         obstacle_coords = []
         for obstacle in self.obstacles:
             obstacle_coords.append(obstacle.exterior.coords[:])
 
-        # Get the coordinats of the path, return
-        path_coords = []
-        for segment in self.path[::-1]:
-            path_coords.append(segment.coords[0])
-
-        return obstacle_coords, path_coords, self.start.coords[:][0], self.goal.coords[:][0]
+        return obstacle_coords, self.start.coords[:][0], self.goal.coords[:][0]
 
     def return_scenariosize(self): # Returns size of environment (width, height)
         return (self.width, self.height)
