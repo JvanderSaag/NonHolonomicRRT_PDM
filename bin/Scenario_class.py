@@ -47,7 +47,7 @@ class Scenario:
     def set_path(self, path):
         # Include path from motion planner into scenario class
         self.path = path
-
+        pass
 
     def set_totaltree(self, tree):
         self.total_tree = tree
