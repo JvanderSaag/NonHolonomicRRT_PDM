@@ -24,4 +24,7 @@ simple_Scenario.set_vehicle(0.6, length=2, width=1)
 dummy_path = (np.vstack((15*np.sin(np.arange(0,2*np.pi,0.01)), 5*np.cos(np.arange(0,2*np.pi,0.01))))).T
 # dummy_yaw = np.zeros(dummy_path.shape[0])
 dummy_yaw = np.random.rand(dummy_path.shape[0],)
+
+#Extracting path coords from csv
+xs, ys, _ = simple_Scenario.read_csv('test1', set_path=True)
 run_sim(simple_Scenario, dummy_path, dummy_yaw)
