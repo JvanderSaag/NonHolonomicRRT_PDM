@@ -93,11 +93,10 @@ class Node:
 
 
 class PATH:
-    def __init__(self, cx, cy, cyaw, ck):
+    def __init__(self, cx, cy, cyaw):
         self.cx = cx
         self.cy = cy
         self.cyaw = cyaw
-        self.ck = ck
         self.length = len(cx)
         self.ind_old = 0
 
@@ -349,7 +348,7 @@ def pi_2_pi(angle):
 
     return angle
 
-
+"""
 def main():
     ax = [0.0, 15.0, 30.0, 50.0, 60.0]
     ay = [0.0, 40.0, 15.0, 30.0, 0.0]
@@ -426,3 +425,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+"""

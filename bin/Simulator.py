@@ -6,15 +6,15 @@ import math
 import cubic_splines as cs
 import Controller
 
-def control_block(xs, ys):
+def control_block(px, py, pyaw):
 	#xs and ys are both lists of x & y coords respectively
 
 	#Time parameterizing the coordinates
-	px, py, pyaw, pk, ps = cs.calc_spline_course(xs, ys, ds=Controller.P.d_dist)
+	#px, py, pyaw, pk, ps = cs.calc_spline_course(xs, ys, ds=Controller.P.d_dist)
 	
 	sp = Controller.calc_speed_profile(px, py, pyaw, Controller.P.target_speed)
 	
-	param_path = Controller.PATH(px, py, pyaw, pk)
+	param_path = Controller.PATH(px, py, pyaw)
 	node = Controller.Node(x=px[0], y=py[0], yaw=pyaw[0], v=0.0)
 
 	time = 0.0
