@@ -35,8 +35,8 @@ class Scenario:
 
     def set_start_goal(self, start, yaw_start, goal, yaw_goal):
         # Set start and goal, and assert datatype is correct
-        assert isinstance(start, shapely.geometry.Point) and isinstance(goal, shapely.geometry.Point), "AssertError: Start and goal are not defined by points!" 
-        self.start, self.goal = (start, yaw_start), (goal, yaw_goal)
+        assert not isinstance(start, shapely.geometry.Point) and not isinstance(goal, shapely.geometry.Point), "AssertError: Changed this to be a tuple, less imports that way, sorry m8" 
+        self.start, self.goal = (shapely.geometry.Point(start[0], start[1]), yaw_start), (shapely.geometry.Point(goal[0], goal[1], yaw_goal), yaw_goal)
         pass
 
     def set_obstacles(self, obstacles):
