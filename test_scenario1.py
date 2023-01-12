@@ -10,7 +10,7 @@ ObstacleCreator.create_rectangle(20, 20, (15, 15))
 obstacles = ObstacleCreator.return_obstacles()
 start, start_yaw, goal, goal_yaw = (5, 5), 0, (45, 45), 0
 
-simple_Scenario = Scenario("Scenario1", env_width=50, env_height=50, boundary_collision=True)
+simple_Scenario = Scenario("test1", env_width=50, env_height=50, boundary_collision=True)
 simple_Scenario.set_obstacles(obstacles)
 simple_Scenario.set_start_goal(start, start_yaw, goal, goal_yaw)
 simple_Scenario.set_vehicle(1/4.39, 4.5, 2)
