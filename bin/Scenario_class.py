@@ -23,7 +23,7 @@ class Scenario:
 
         # If boundary collision is set to true, bbox is created.
         if boundary_collision: 
-            bbox_coords = [(0, 0), (0, self.width), (self.width, self.height), (self.width, 0), (0, 0)]
+            bbox_coords = [(0, 0), (0, self.height), (self.width, self.height), (self.width, 0), (0, 0)]
             self.boundary = shapely.geometry.LineString(bbox_coords)
         else:
             self.boundary = None # Else None boundary
@@ -101,6 +101,11 @@ class Scenario:
 
     def plot_scenario(self, plot_all_trees=False): # Plot the scenario in matplotlib
         fig, ax = plt.subplots()
+
+        # Set size of plot using environment size
+        ratio = self.height / self.width
+        fig.set_figheight(ratio * 7)
+        fig.set_figwidth((1 / ratio) * 7)
 
         # Set boundaries for drawing scenario
         plt.xlim([0, self.width])
