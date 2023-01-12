@@ -17,7 +17,7 @@ simple_Scenario.set_vehicle(1/4.39, 4.5, 2)
 
 RRT(1000, simple_Scenario, backwards=True)
 
-#simple_Scenario.write_csv('test1')
+simple_Scenario.write_csv('test1')
 #simple_Scenario.read_csv('test1', set_path=True)
 
 simple_Scenario.plot_scenario()
