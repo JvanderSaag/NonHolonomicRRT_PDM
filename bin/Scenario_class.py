@@ -5,6 +5,7 @@
 import shapely.geometry
 import matplotlib.pyplot as plt
 import matplotlib.patches
+import matplotlib.transforms
 import numpy as np
 import pandas as pd
 import os
@@ -42,6 +43,9 @@ class Scenario:
         # Set list of obstacles, and assert datatype is correct
         assert all(isinstance(x, shapely.geometry.Polygon) for x in obstacles), "AssertError: Obstacles are not polygons!" 
         self.obstacles = obstacles # define obstacles as list of shapely objects
+        
+        buffer_size = np.sqrt((self.vehicle_length/2)**2 + (self.vehicle_width/2)**2) # Diagonal from center to corner
+        self.buffered_obstacles = [obstacle.buffer(buffer_size, cap_style=1) for obstacle in self.obstacles]
         pass
 
     def set_path(self, path):
@@ -61,24 +65,15 @@ class Scenario:
         pass
 
     def collision_free(self, object): # Check if given path/points object from RRT is collision_free
-        try: # Object can be any shapely object (point, line or polygon)            
-            # Change the buffer based on whether the object is a point or linestring
-            if object.geom_type == "LineString": # If it is a linestring
-                path_buffer = self.vehicle_length/2 # Buffer path with half the vehicle length
-                for obstacle in self.obstacles:
-                    if object.buffer(1.05 * path_buffer, cap_style=3).intersects(obstacle): # Check collisions with obstacles in scenario
-                        return False # Returns False if collision occurs (not collision free)
+        try: # Object can be any shapely object (point, line or polygon)
+            object.geom_type # Check if object is shapely geometry object
 
-            elif object.geom_type == "Point": # If the object is a point
-                point_buffer = np.sqrt((self.vehicle_length/2)**2 + (self.vehicle_width/2)**2) # Buffer to compensate for vehicle dimensions
-                for obstacle in self.obstacles:
-                    if object.buffer(1.05 * point_buffer).intersects(obstacle): # Check collisions with obstacles in scenario
-                        return False # Returns False if collision occurs (not collision free)
-
-            if self.boundary is not None: # Check collisions with the boundary in scenario
-                if object.intersects(self.boundary): 
+            for obstacle in self.buffered_obstacles:
+                if object.intersects(obstacle): # Check collisions with obstacles in scenario
                     return False # Returns False if collision occurs (not collision free)
-
+            if self.boundary is not None:
+                if object.intersects(self.boundary): # Check collisions with the boundary in scenario
+                    return False # Returns False if collision occurs (not collision free)
             return True # Returns True if no collisions
         
         except AttributeError: # In case object does not have geom_type attribute (not shapely object)
@@ -135,6 +130,7 @@ class Scenario:
             else: # Draw start and goal as points
                 plt.scatter(self.start[0].x, self.start[0].y, s=50, c='g', marker='o', label='Start')
                 plt.scatter(self.goal[0].x, self.goal[0].y, s=60, c='r', marker='*', label='Goal')
+
 
         # Draw boundary, if it exists
         if self.boundary is not None:
