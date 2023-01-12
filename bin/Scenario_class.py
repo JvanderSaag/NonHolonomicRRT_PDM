@@ -30,7 +30,7 @@ class Scenario:
             self.boundary = None # Else None boundary
         
         # Initialise size and curvature radius of vehicle to zero
-        self.vehicle_length, self.vehicle_width, self.curve_radius = 0, 0, 0
+        self.vehicle_length, self.vehicle_width, self.curve_radius = 0, 0, [0.1]
         pass
 
     def set_start_goal(self, start, yaw_start, goal, yaw_goal):
