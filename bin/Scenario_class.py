@@ -114,9 +114,9 @@ class Scenario:
         if self.start is not None and self.goal is not None:
             if self.vehicle_length != 0 and self.vehicle_width != 0: # If the vehicle size has been set, draw start and goal as vehicle
                 ax.add_patch(matplotlib.patches.Rectangle((self.start[0].x - self.vehicle_length / 2, self.start[0].y - self.vehicle_width / 2),
-                                                            self.vehicle_length, self.vehicle_width, self.start[1], color='red', alpha=0.8, label='Start'))
+                                                            self.vehicle_length, self.vehicle_width, self.start[1], color='red', alpha=0.8, label='Start', rotation_point='center'))
                 ax.add_patch(matplotlib.patches.Rectangle((self.goal[0].x - self.vehicle_length / 2, self.goal[0].y - self.vehicle_width / 2), 
-                                                            self.vehicle_length, self.vehicle_width, self.goal[1], color='green', alpha=0.8, label='Goal'))
+                                                            self.vehicle_length, self.vehicle_width, self.goal[1], color='green', alpha=0.8, label='Goal', rotation_point='center'))
             else: # Draw start and goal as points
                 plt.scatter(self.start[0].x, self.start[0].y, s=50, c='g', marker='o', label='Start')
                 plt.scatter(self.goal[0].x, self.goal[0].y, s=60, c='r', marker='*', label='Goal')
