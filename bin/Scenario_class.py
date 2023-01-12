@@ -72,7 +72,7 @@ class Scenario:
         try: # Object can be any shapely object (point, line or polygon)
             object.geom_type # Check if object is shapely geometry object
 
-            for obstacle in self.obstacles:
+            for obstacle in self.buffered_obstacles:
                 if object.intersects(obstacle): # Check collisions with obstacles in scenario
                     return False # Returns False if collision occurs (not collision free)
             if self.boundary is not None:
@@ -121,7 +121,7 @@ class Scenario:
         plt.ylim([0, self.height])
 
         # Draw obstacles
-        for obstacle in self.buffered_obstacles:
+        for obstacle in self.obstacles:
             ax.add_patch(matplotlib.patches.Polygon(obstacle.exterior.coords, color="grey"))
         
         # Draw start and goal
