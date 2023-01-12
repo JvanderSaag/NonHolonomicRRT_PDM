@@ -2,21 +2,63 @@ import pygame
 from shapely import affinity
 from shapely.geometry import Polygon
 import numpy as np
-class Controller:
-	def __init__():
-		# Set up member variables
-		self.x_pos = 0
-		self.y_pos = 0
-		self.yaw = 0
+import math
+import cubic_splines as cs
+import Controller
 
-	def update_state():
-		'''
-		For every path point and yaw value, the controller outputs the vehicle's control variables. These can be any physical quantity
-		and are not strictly tied to the simulator. 
+def control_block(xs, ys):
+	#xs and ys are both lists of x & y coords respectively
 
-		The only thing that the run_sim function expects to get is the position and orientation of the vehicle at a given point in time. 
-		For now, the local_controller simply relays its path_point and yaw_value inputs to the run_sim function
-		'''
+	#Time parameterizing the coordinates
+	px, py, pyaw, pk, ps = cs.calc_spline_course(xs, ys, ds=Controller.P.d_dist)
+	
+	sp = Controller.calc_speed_profile(px, py, pyaw, Controller.P.target_speed)
+	
+	param_path = Controller.PATH(px, py, pyaw, pk)
+	node = Controller.Node(x=px[0], y=py[0], yaw=pyaw[0], v=0.0)
+
+	time = 0.0
+	
+	x = [node.x]
+	y = [node.y]
+	yaw = [node.yaw]
+	v = [node.v]
+	t = [0.0]
+	d = [0.0]
+	a = [0.0]
+	
+	delta_opt, a_opt = None, None
+	a_exc, delta_exc = 0.0, 0.0
+	
+	while time < Controller.P.time_max:
+		z_ref, target_ind = Controller.calc_ref_trajectory_in_T_step(node, param_path, sp)
+		
+		z0 = [node.x, node.y, node.v, node.yaw]
+		
+		a_opt, delta_opt, x_opt, y_opt, yaw_opt, v_opt = Controller.linear_mpc_control(z_ref, z0, a_opt, delta_opt)
+		
+		if delta_opt is not None:
+			delta_exc, a_exc = delta_opt[0], a_opt[0]
+			
+		
+		node.update(a_exc, delta_exc, 1.0)
+		time += Controller.P.dt
+		
+		x.append(node.x)
+		y.append(node.y)
+		yaw.append(node.yaw)
+		v.append(node.v)
+		t.append(time)
+		d.append(delta_exc)
+		a.append(a_exc)
+		
+		dist = math.hypot(node.x - px[-1], node.y - py[-1])
+
+		if dist < Controller.P.dist_stop and abs(node.v) < Controller.P.speed_stop:
+			break
+
+		dy = (node.yaw - yaw[-2]) / (node.v * Controller.P.dt)
+		steer = Controller.pi_2_pi(-math.atan(Controller.P.WB * dy))
 
 
 def run_sim(scenario, path_points, path_yaw):
