@@ -21,7 +21,7 @@ class TreeNode: # Tree Node class that RRT uses
 
 
 ## RRT/ RRT* implementation for global motion planner ##
-def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, non_holonomic=True, force_plot_tree=False, backwards=True):
+def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, non_holonomic=True, force_return_tree=False, backwards=True):
     # Initialise start and goal node
     start_Node, goal_Node = TreeNode(scenario.start[0], scenario.start[1]), TreeNode(scenario.goal[0], scenario.goal[1])
 
@@ -139,7 +139,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
         return
 
     else: # If it does not converge, there will be no Nodes near the goal
-        if force_plot_tree: # Force plot the tree, regardless whether it converges
+        if force_return_tree: # Force plot the tree, regardless whether it converges
             print("Force plotted the entire tree, convergence not guaranteed")
             scenario.set_totaltree(extract_all_edges(start_Node))
             return 
