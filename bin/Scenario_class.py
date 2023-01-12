@@ -45,7 +45,7 @@ class Scenario:
         self.obstacles = obstacles # define obstacles as list of shapely objects
         
         buffer_size = np.sqrt((self.vehicle_length/2)**2 + (self.vehicle_width/2)**2) # Diagonal from center to corner
-        self.buffered_obstacles = [obstacle.buffer(buffer_size, cap_style=1) for obstacle in self.obstacles]
+        self.buffered_obstacles = [obstacle.buffer(1.1 * buffer_size, cap_style=1) for obstacle in self.obstacles]
         pass
 
     def set_path(self, path):
@@ -62,13 +62,17 @@ class Scenario:
         self.max_curvature = np.linspace(0.1, max_curvature, 6).tolist()
         self.vehicle_length = length
         self.vehicle_width = width
+
+        # Re-buffer obstacles, in case the vehicle size was set before
+        buffer_size = np.sqrt((self.vehicle_length/2)**2 + (self.vehicle_width/2)**2) # Diagonal from center to corner
+        self.buffered_obstacles = [obstacle.buffer(1.1 * buffer_size, cap_style=1) for obstacle in self.obstacles]
         pass
 
     def collision_free(self, object): # Check if given path/points object from RRT is collision_free
         try: # Object can be any shapely object (point, line or polygon)
             object.geom_type # Check if object is shapely geometry object
 
-            for obstacle in self.buffered_obstacles:
+            for obstacle in self.obstacles:
                 if object.intersects(obstacle): # Check collisions with obstacles in scenario
                     return False # Returns False if collision occurs (not collision free)
             if self.boundary is not None:
@@ -117,7 +121,7 @@ class Scenario:
         plt.ylim([0, self.height])
 
         # Draw obstacles
-        for obstacle in self.obstacles:
+        for obstacle in self.buffered_obstacles:
             ax.add_patch(matplotlib.patches.Polygon(obstacle.exterior.coords, color="grey"))
         
         # Draw start and goal
