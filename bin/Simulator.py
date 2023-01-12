@@ -3,14 +3,11 @@ from shapely import affinity
 from shapely.geometry import Polygon
 import numpy as np
 import math
-import cubic_splines as cs
 import Controller
+
 
 def control_block(px, py, pyaw):
 	#xs and ys are both lists of x & y coords respectively
-
-	#Time parameterizing the coordinates
-	#px, py, pyaw, pk, ps = cs.calc_spline_course(xs, ys, ds=Controller.P.d_dist)
 	
 	sp = Controller.calc_speed_profile(px, py, pyaw, Controller.P.target_speed)
 	
