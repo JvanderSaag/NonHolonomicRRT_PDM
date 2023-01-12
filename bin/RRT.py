@@ -30,7 +30,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
         elif not star and np.random.random_sample() < 0.05: # For normal RRT, have a chance of picking the goal node as the sampled node
             sampled_Node = goal_Node
         else:  # Otherwise, randomly sample a point in the environment
-            sampled_Node = TreeNode(rand_coords(scenario.width, scenario.height), np.deg2rad(np.random.randint(0, 360,1)))
+            sampled_Node = TreeNode(rand_coords(scenario.width, scenario.height), np.deg2rad(np.random.randint(0, 360,1))[0])
            
             # Random chance to orient point to goal, only if sampled point is not the goal
             if not sampled_Node.point.equals(goal_Node.point) and np.random.random_sample() < 0.05:
