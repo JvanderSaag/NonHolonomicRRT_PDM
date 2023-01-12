@@ -61,14 +61,24 @@ class Scenario:
         pass
 
     def collision_free(self, object): # Check if given path/points object from RRT is collision_free
-        try: # Object can be any shapely object (point, line or polygon)
-            object.geom_type # Check if object is shapely geometry object
-            for obstacle in self.obstacles:
-                if object.intersects(obstacle.buffer(self.vehicle_length/2, cap_style=3)): # Check collisions with obstacles in scenario
+        try: # Object can be any shapely object (point, line or polygon)            
+            # Change the buffer based on whether the object is a point or linestring
+            if object.geom_type == "LineString": # If it is a linestring
+                path_buffer = self.vehicle_length/2 # Buffer path with half the vehicle length
+                for obstacle in self.obstacles:
+                    if object.buffer(1.05 * path_buffer, cap_style=3).intersects(obstacle): # Check collisions with obstacles in scenario
+                        return False # Returns False if collision occurs (not collision free)
+
+            elif object.geom_type == "Point": # If the object is a point
+                point_buffer = np.sqrt((self.vehicle_length/2)**2 + (self.vehicle_width/2)**2) # Buffer to compensate for vehicle dimensions
+                for obstacle in self.obstacles:
+                    if object.buffer(1.05 * point_buffer).intersects(obstacle): # Check collisions with obstacles in scenario
+                        return False # Returns False if collision occurs (not collision free)
+
+            if self.boundary is not None: # Check collisions with the boundary in scenario
+                if object.intersects(self.boundary): 
                     return False # Returns False if collision occurs (not collision free)
-            if self.boundary is not None:
-                if object.intersects(self.boundary): # Check collisions with the boundary in scenario
-                    return False # Returns False if collision occurs (not collision free)
+
             return True # Returns True if no collisions
         
         except AttributeError: # In case object does not have geom_type attribute (not shapely object)
