@@ -29,8 +29,8 @@ class Scenario:
         else:
             self.boundary = None # Else None boundary
         
-        # Initialise size and curvature radius of vehicle to zero
-        self.vehicle_length, self.vehicle_width, self.curve_radius = 0, 0, [0.1]
+        # Initialise size and curvature of vehicle to zero
+        self.vehicle_length, self.vehicle_width, self.max_curvature = 0, 0, [0.1]
         pass
 
     def set_start_goal(self, start, yaw_start, goal, yaw_goal):
@@ -58,8 +58,8 @@ class Scenario:
         pass 
     
     # set vehicle size to be used for Buffer around obstacles
-    def set_vehicle(self, max_curve_radius, length=0, width=0):
-        self.curve_radius = np.linspace(0.1, max_curve_radius, 6).tolist()
+    def set_vehicle(self, max_curvature, length=0, width=0):
+        self.max_curvature = np.linspace(0.1, max_curvature, 6).tolist()
         self.vehicle_length = length
         self.vehicle_width = width
         pass
@@ -87,7 +87,7 @@ class Scenario:
         path_coords = []
         for segment in self.path[::-1]:
             x, y = np.array(list(zip(*segment.coords))[0]),np.array(list(zip(*segment.coords))[1]) # Get x and y values from linestring segment
-            yaw = (np.degrees(np.arctan2(np.diff(y), np.diff(x))) + 360) % 360 # Find yaw / derivative
+            yaw = np.deg2rad((np.degrees(np.arctan2(np.diff(y), np.diff(x))) + 360) % 360)# Find yaw / derivative
             for idx, coord in enumerate(segment.coords[:-1]): # Exclude last coordinate, same as first one of next segment
                 path_coords.append((round(coord[0], 3), round(coord[1], 3), round(yaw[idx], 3))) # Round coordinates to 3 dec places 
         return path_coords
