@@ -219,8 +219,8 @@ def create_connector(Node1, Node2, scenario, non_holonomic, backwards):
     if not non_holonomic:
         return LineString([Node1.point, Node2.point])
     maxc = scenario.curve_radius # Turning radius
-    sx, sy, syaw = Node1.point.x, Node1.point.y , math.radians(Node1.yaw) # Coordinates and orientation of Node 1
-    gx, gy, gyaw = Node2.point.x, Node2.point.y, math.radians(Node2.yaw) # Coordinates and orientatio of Node 2
+    sx, sy, syaw = Node1.point.x, Node1.point.y , round(np.radians(round(Node1.yaw,2)),2) # Coordinates and orientation of Node 1
+    gx, gy, gyaw = Node2.point.x, Node2.point.y, round(np.radians(round(Node2.yaw,2)),2) # Coordinates and orientatio of Node 2
     if gx != sx and gy != sy: # Checks both node to connect arent the same node
         if not backwards:
             # Return list of possible connecting curves from Reeds-Schepp
