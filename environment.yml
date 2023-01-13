@@ -1,0 +1,16 @@
+name: group13_pdm_project
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - matplotlib  
+  - numpy  
+  - pandas 
+  - pip
+  - python
+  - wheel 
+  - scipy
+  - pygame
+  - cvxpy
+  - shapely
+  - tqdm
