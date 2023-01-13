@@ -47,6 +47,24 @@ The following packages are needed to run this project:
 
 This project was made using the latest version of these packages. The correct functionment of this program is not garantied with earlier versions of these packages.
 
+# Installation
+We recommend using a virtual environment to execute these scripts. The repository contains a conda environment.yaml file (if you use anaconda) and a requirements.txt file (if you use python virtual environments). These environments can be created as follows.
+
+## For Anaconda
+- Download and install Anaconda 
+- Open Anaconda Prompt (Anaconda3) or your preferred terminal program (in case you use linux)
+- In the terminal use cd to the directory where you extracted the folder
+- Follow these commands
+$ conda env create -f environment.yml
+$ python -m ipykernel install --user --name=python3
+- Execute any of the provided test scenarios
+
+## For Python VEnvs
+- Follow the same process up until the commands
+- Follow these commands
+$ python -m pip install -r requirements.txt
+- Execute any of the provided test scenarios
+
 # Usage
 In order to understand how to run this project scenarios were provided pre-built and only require to be ran to work.
 
