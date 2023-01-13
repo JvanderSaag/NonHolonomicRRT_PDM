@@ -171,7 +171,7 @@ class Scenario:
             dataframe.to_csv(f"./Saved_scenarios/{self.name}_Path_{name}")
             print('file saved')
 
-    def read_csv(self, name, set_path=False): # Read csv file if set_path is true the path of the scenario will be set from the csv data
+    def read_csv(self, name, set_path=True): # Read csv file if set_path is true the path of the scenario will be set from the csv data
         dataset = pd.read_csv(f"./Saved_scenarios/{self.name}_Path_{name}", index_col=[0]) # Obtain pandas dataframe from csv
         x, y, yaw = dataset['x_coord'].values.tolist(), dataset['y_coord'].values.tolist(), dataset['yaw'].values.tolist()
         if set_path: # If the path was to be set from csv 
