@@ -26,7 +26,10 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
     start_Node, goal_Node = TreeNode(scenario.start[0], scenario.start[1]), TreeNode(scenario.goal[0], scenario.goal[1])
 
     for n in tqdm(range(N_iter)): # Max N_iter iterations
-        if star and n > N_iter - 5: # For RRT*, pick the goal node as the last few nodes to improve convergence chances
+        if n == 1: # First iteration, pick the goal node to try if an easy path already exists
+            sampled_Node = goal_Node
+
+        elif star and n > N_iter - 5: # For RRT*, pick the goal node as the last few nodes to improve convergence chances
             sampled_Node = goal_Node
         elif not star and np.random.random_sample() < 0.05: # For normal RRT, have a chance of picking the goal node as the sampled node
             sampled_Node = goal_Node
