@@ -12,8 +12,6 @@ import matplotlib.pyplot as plt
 
 #import Control.draw as draw
 #import CurvesGenerator.reeds_shepp as rs
-#import CurvesGenerator.cubic_spline as cs
-import cubic_splines as cs
 
 
 class P:
@@ -39,11 +37,11 @@ class P:
     du_res = 0.1  # threshold for stopping iteration
 
     # vehicle config
-    RF = 3.3  # [m] distance from rear to vehicle front end of vehicle
+    RF = 3.7  # [m] distance from rear to vehicle front end of vehicle
     RB = 0.8  # [m] distance from rear to vehicle back end of vehicle
-    W = 2.4  # [m] width of vehicle
+    W = 2  # [m] width of vehicle
     WD = 0.7 * W  # [m] distance between left-right wheels
-    WB = 2.5  # [m] Wheel base
+    WB = 2.9  # [m] Wheel base
     TR = 0.44  # [m] Tyre radius
     TW = 0.7  # [m] Tyre width
 
