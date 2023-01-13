@@ -38,29 +38,35 @@ This folder contains old version of certain part of the code and are'nt supporte
 
 # Dependencies
 The following packages are needed to run this project:
-
-- math
-- [shapely](https://shapely.readthedocs.io/en/stable/manual.html)
-- [matplotlib](https://pypi.org/project/matplotlib/)
-- [numpy](https://numpy.org/)
-- [tqdm](https://github.com/tqdm/tqdm)
+- matplotlib  
+- numpy  
+- pandas 
+- pip
+- python
+- wheel 
+- scipy
+- pygame
+- cvxpy
+- shapely
+- tqdm
 
 This project was made using the latest version of these packages. The correct functionment of this program is not garantied with earlier versions of these packages.
 
 # Installation
-We recommend using a virtual environment to execute these scripts. The repository contains a conda environment.yaml file (if you use anaconda) and a requirements.txt file (if you use python virtual environments). These environments can be created as follows.
+We recommend using a virtual environment to execute these scripts. The repository contains a conda environment.yaml file. The environment can be created as follows.
 
-## For Anaconda
-- Download and install Anaconda 
+- Download and install Anaconda (if you do not use conda, you can also just make a python virtual environment with the packages mentioned in dependecies)
 - Open Anaconda Prompt (Anaconda3) or your preferred terminal program (in case you use linux)
 - In the terminal use cd to the directory where you extracted the folder
 - Follow these commands
 
+```
 $ conda env create -f environment.yml
 
 $ python -m ipykernel install --user --name=python3
 
 $ conda activate group13_pdm_project
+```
 - Execute any of the provided test scenarios
 
 
