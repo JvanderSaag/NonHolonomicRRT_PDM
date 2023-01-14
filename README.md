@@ -134,11 +134,12 @@ In order to save a scenario add the following line after running RRT:
 
 `simple_Scenario.write_csv('example_name')` 
 
-And in the same scenario file previous path can be read from the file by using:
+After a path has been saved, it can be read and plotted without running the RRT function. If a saved path 
+is to be loaded, remove the RRT() and write_csv() functions from the scenario file, and use:
 
  `simple_Scenario.read_csv('example_name')`
  
-In this case there is no need to run the RRT function before.
+In order to read the saved path. 
 # References
 
 Reeds Shepp curves planning implemented using existing code authored by Atsushi Sakai. The code was modified in order to output paths compatible with our implementation of RRT, and also features were added in order to increase the flexibility of the code. (https://github.com/AtsushiSakai/PythonRobotics/blob/master/PathPlanning/ReedsSheppPath/reeds_shepp_path_planning.py)
