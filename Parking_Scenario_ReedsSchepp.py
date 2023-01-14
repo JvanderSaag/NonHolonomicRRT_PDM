@@ -34,9 +34,9 @@ simple_Scenario.set_obstacles(obstacles)
 simple_Scenario.set_start_goal(start, start_yaw, goal, goal_yaw)
 simple_Scenario.set_vehicle(1/4.39, 4.5, 2)
 
-RRT(20000, simple_Scenario, force_return_tree=True)
+RRT(2000, simple_Scenario, force_return_tree=True)
 
 
-#simple_Scenario.read_csv('ReddsShepp_11.15_2k', set_path=True)
+#simple_Scenario.read_csv('ReedsShepp_11.15_2k', set_path=True)
 simple_Scenario.plot_scenario(plot_all_trees=True)
-simple_Scenario.write_csv('Dubins_star')
+simple_Scenario.write_csv('ReedsShepp')
