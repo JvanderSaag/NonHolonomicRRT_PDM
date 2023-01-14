@@ -12,10 +12,10 @@ sys.path.append('../NonHolonomicRRT_PDM')
 from test_scenario1 import simple_Scenario
 
 def main():
-    cx, cy, cyaw = simple_Scenario.read_csv('test2', set_path=True)
-
-    sp = Controller.calc_speed_profile(cx, cy, cyaw, Controller.P.target_speed)
-
+    cx, cy, cyaw, reversing = simple_Scenario.read_csv('test1', set_path=True)
+    cyaw = np.deg2rad([-(360-i) if i>180 else i for i in cyaw])
+    #cyaw = np.deg2rad(cyaw)
+    sp = Controller.calc_speed_profile(cx, cy, cyaw, Controller.P.target_speed, reversing)
     ref_path = Controller.PATH(cx, cy, cyaw)
     node = Controller.Node(x=cx[0], y=cy[0], yaw=cyaw[0], v=0.0)
 
