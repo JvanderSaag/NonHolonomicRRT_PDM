@@ -4,7 +4,8 @@ This project uses a modified version of RRT* with Reeds Shepp and Dubins connect
 
 
 # Description
-The project main objective is to demonstrate the difference in efficiency for varying non-holonomic connectors as well as the difference in computation time. Furthermore a simple an MPC controller was added in order to visualise a vehicle following the calculated path.
+The project main objective is to demonstrate an RRT* motion planner for a non-holonomic system, and the difference in performance when using different types of connector functions. Furthermore a simple an MPC controller was added in order to visualise a vehicle following the calculated path.
+
 ## Files
 The project is structured in multiple folders and files. 
 
