@@ -24,11 +24,10 @@ class TreeNode: # Tree Node class that RRT uses
 def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, non_holonomic=True, force_return_tree=False, backwards=True):
     # Initialise start and goal node
     start_Node, goal_Node = TreeNode(scenario.start[0], scenario.start[1]), TreeNode(scenario.goal[0], scenario.goal[1])
-
     for n in tqdm(range(N_iter)): # Max N_iter iterations
         if n == 1: # First iteration, pick the goal node to try if an easy path already exists
             sampled_Node = goal_Node
-        elif star and n == N_iter - 1: # For RRT*, pick the goal node as the last node to improve convergence chances
+        elif star and n == N_iter - 5: # For RRT*, pick the goal node as the last node to improve convergence chances
             sampled_Node = goal_Node
         elif not star and np.random.random_sample() < 0.05: # For normal RRT, have a chance of picking the goal node as the sampled node
             sampled_Node = goal_Node
@@ -198,6 +197,7 @@ def find_nearby_nodes(start_Node, goal_Node, tol, nearby_Nodes=[]): # Find Nodes
         for child in start_Node.children: # For each child
             if child.point.distance(goal_Node.point) < tol: # If the child is within the tolerated distance of goal node
                 nearby_Nodes.append(child) # Add the node to the nearby_Nodes list
+                print(child.point.coords[:], child.parent.point.coords[:])
             find_nearby_nodes(child, goal_Node, tol, nearby_Nodes) # Recursively repeat over all its children
     return nearby_Nodes
 

@@ -37,7 +37,7 @@ class Scenario:
     def set_start_goal(self, start, yaw_start, goal, yaw_goal):
         # Set start and goal, and assert datatype is correct
         assert not isinstance(start, shapely.geometry.Point) and not isinstance(goal, shapely.geometry.Point), "AssertError: Changed this to be a tuple, less imports that way, sorry m8" 
-        self.start, self.goal = (shapely.geometry.Point(start[0], start[1]), yaw_start), (shapely.geometry.Point(goal[0], goal[1], yaw_goal), yaw_goal)
+        self.start, self.goal = (shapely.geometry.Point(start[0], start[1]), yaw_start), (shapely.geometry.Point(goal[0], goal[1]), yaw_goal)
         pass
 
     def set_obstacles(self, obstacles):
@@ -65,8 +65,8 @@ class Scenario:
         self.vehicle_width = width
 
         # Re-buffer obstacles, in case the vehicle size was set before
-        buffer_size = np.sqrt((self.vehicle_length/2)**2 + (self.vehicle_width/2)**2) # Diagonal from center to corner
-        self.buffered_obstacles = [obstacle.buffer(1.1 * buffer_size, cap_style=1) for obstacle in self.obstacles]
+        buffer_size = self.vehicle_length / 2 # Vehicle length is the buffer
+        self.buffered_obstacles = [obstacle.buffer(1.05 * buffer_size, cap_style=1) for obstacle in self.obstacles]
         pass
 
     def collision_free(self, object): # Check if given path/points object from RRT is collision_free
@@ -190,6 +190,10 @@ class Scenario:
         pass
     
     def write_csv(self, name): # Function to write csv file
+        if len(self.path) == 0: # Check if path exists
+            print("No path found, cannot be set")
+            return None
+
         path_coord = np.array(self.return_path_coords()).T # Obtain the x, y coordinates and yaw of each point
         dataframe = pd.DataFrame({'x_coord': path_coord[0], 'y_coord':path_coord[1], 'yaw':path_coord[2], 'reversing':path_coord[3]}) # create a panda dataframe
         if find(f'{self.name}_Path_{name}'): # Check if file to be saved already exists
