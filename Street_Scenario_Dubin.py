@@ -22,6 +22,6 @@ simple_Scenario.set_vehicle(1/4.39, width=2, length=4.5)
 RRT(20000, simple_Scenario, star=True, backwards=False, force_return_tree=True, step_size=20)
 
 
-#simple_Scenario.read_csv('ReedsShepp_star_11.13_4k', set_path=True)
+#simple_Scenario.read_csv('Dubins_39.54_20k', set_path=True)
 simple_Scenario.plot_scenario(plot_all_trees=True)
 simple_Scenario.write_csv('Dubins_star')    
