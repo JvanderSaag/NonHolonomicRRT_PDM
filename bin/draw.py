@@ -1,3 +1,7 @@
+'''
+Draw function for simulation
+author: huiming zhou (https://github.com/zhm-real)
+'''
 import math
 import numpy as np
 import matplotlib.pyplot as plt
