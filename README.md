@@ -111,7 +111,7 @@ In order to save a scenario add the following line after running RRT:
 
 And in the same scenario file previous path can be read from the file by using:
 
- `simple_Scenario.read_csv('example_name', set_path=True)`
+ `simple_Scenario.read_csv('example_name')`
  
 In this case there is no need to run the RRT function before.
 # References
