@@ -140,6 +140,13 @@ is to be loaded, remove the RRT() and write_csv() functions from the scenario fi
  `simple_Scenario.read_csv('example_name')`
  
 In order to read the saved path. 
+
+To return the coordinates of the path that are saved in the csv file, the following command can be used:
+
+`simple_scenario.return_path_coords()`
+
+This returns a list of tuples, where each tuple represents (x, y, yaw, reversing). x and y indicate the coordinates of the point, where (x, y) = (0, 0) is the bottom left corner. The yaw is positive counter-clockwise on the domain [0, 360] degrees. The boolean 'reversing' indicates whether the car is moving backwards at that point. This is only relevant when using Reeds-Schepp path connectors.
+
 # References
 
 Reeds Shepp curves planning implemented using existing code authored by Atsushi Sakai. The code was modified in order to output paths compatible with our implementation of RRT, and also features were added in order to increase the flexibility of the code. (https://github.com/AtsushiSakai/PythonRobotics/blob/master/PathPlanning/ReedsSheppPath/reeds_shepp_path_planning.py)
