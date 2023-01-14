@@ -4,7 +4,7 @@ from shapely.geometry import Point
 from bin.RRT import RRT
 
 # Define scenario   
-Scenario1 = Scenario("Scenario1_ParallelParking", env_width=20, env_height=40, boundary_collision=False)
+Scenario1 = Scenario("ParallelParking_Scenario", env_width=20, env_height=40, boundary_collision=False)
 
 # Set vehicle parameters
 Scenario1.set_vehicle(1/4.39, 4.5, 2)  # Max curvature, length, width
