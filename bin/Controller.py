@@ -7,12 +7,6 @@ import cvxpy
 import numpy as np
 import matplotlib.pyplot as plt
 
-#sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-#                "/../../MotionPlanning/")
-
-#import Control.draw as draw
-#import CurvesGenerator.reeds_shepp as rs
-
 
 class P:
     # System config
@@ -21,12 +15,12 @@ class P:
     T = 6  # finite time horizon length
 
     # MPC config
-    Q = np.diag([10.0, 10.0, 5.0, 5.0])  # penalty for states
-    Qf = np.diag([10.0, 10.0, 1.0, 1.0])  # penalty for end state
+    Q = np.diag([2.0, 2.0, 1.0, 2.0])  # penalty for states
+    Qf = np.diag([5.0, 5.0, 5.0, 5.0])  # penalty for end state
     R = np.diag([0.01, 0.1])  # penalty for inputs
     Rd = np.diag([0.01, 0.1])  # penalty for change of inputs
 
-    dist_stop = 1.5  # stop permitted when dist to goal < dist_stop
+    dist_stop = 0.15  # stop permitted when dist to goal < dist_stop
     speed_stop = 0.5 / 3.6  # stop permitted when speed < speed_stop
     time_max = 500.0  # max simulation time
     iter_max = 5  # max iteration
@@ -300,7 +294,7 @@ def solve_linear_mpc(z_ref, z_bar, z0, d_bar):
     return a, delta, x, y, yaw, v
 
 
-def calc_speed_profile(cx, cy, cyaw, target_speed):
+def calc_speed_profile(cx, cy, cyaw, target_speed, reversing):
     """
     design appropriate speed strategy
     :param cx: x of reference path [m]
@@ -315,17 +309,10 @@ def calc_speed_profile(cx, cy, cyaw, target_speed):
 
     # Set stop point
     for i in range(len(cx) - 1):
-        dx = cx[i + 1] - cx[i]
-        dy = cy[i + 1] - cy[i]
-
-        move_direction = math.atan2(dy, dx)
-
-        if dx != 0.0 and dy != 0.0:
-            dangle = abs(pi_2_pi(move_direction - cyaw[i]))
-            if dangle >= math.pi / 4.0:
-                direction = -1.0
-            else:
-                direction = 1.0
+        if reversing[i]:
+            direction = -1.0
+        else:
+            direction = 1.0
 
         if direction != 1.0:
             speed_profile[i] = - target_speed
@@ -346,81 +333,3 @@ def pi_2_pi(angle):
 
     return angle
 
-"""
-def main():
-    ax = [0.0, 15.0, 30.0, 50.0, 60.0]
-    ay = [0.0, 40.0, 15.0, 30.0, 0.0]
-    cx, cy, cyaw, ck, s = cs.calc_spline_course(
-        ax, ay, ds=P.d_dist)
-
-    sp = calc_speed_profile(cx, cy, cyaw, P.target_speed)
-
-    ref_path = PATH(cx, cy, cyaw, ck)
-    node = Node(x=cx[0], y=cy[0], yaw=cyaw[0], v=0.0)
-
-    time = 0.0
-    x = [node.x]
-    y = [node.y]
-    yaw = [node.yaw]
-    v = [node.v]
-    t = [0.0]
-    d = [0.0]
-    a = [0.0]
-
-    delta_opt, a_opt = None, None
-    a_exc, delta_exc = 0.0, 0.0
-
-    while time < P.time_max:
-        z_ref, target_ind = \
-            calc_ref_trajectory_in_T_step(node, ref_path, sp)
-
-        z0 = [node.x, node.y, node.v, node.yaw]
-
-        a_opt, delta_opt, x_opt, y_opt, yaw_opt, v_opt = \
-            linear_mpc_control(z_ref, z0, a_opt, delta_opt)
-
-        if delta_opt is not None:
-            delta_exc, a_exc = delta_opt[0], a_opt[0]
-
-        node.update(a_exc, delta_exc, 1.0)
-        time += P.dt
-
-        x.append(node.x)
-        y.append(node.y)
-        yaw.append(node.yaw)
-        v.append(node.v)
-        t.append(time)
-        d.append(delta_exc)
-        a.append(a_exc)
-
-        dist = math.hypot(node.x - cx[-1], node.y - cy[-1])
-
-        if dist < P.dist_stop and \
-                abs(node.v) < P.speed_stop:
-            break
-
-        dy = (node.yaw - yaw[-2]) / (node.v * P.dt)
-        steer = pi_2_pi(-math.atan(P.WB * dy))
-        '''
-        plt.cla()
-        draw.draw_car(node.x, node.y, node.yaw, steer, P)
-        plt.gcf().canvas.mpl_connect('key_release_event',
-                                     lambda event:
-                                     [exit(0) if event.key == 'escape' else None])
-
-        if x_opt is not None:
-            plt.plot(x_opt, y_opt, color='darkviolet', marker='*')
-
-        plt.plot(cx, cy, color='gray')
-        plt.plot(x, y, '-b')
-        plt.plot(cx[target_ind], cy[target_ind])
-        plt.axis("equal")
-        plt.title("Linear MPC, " + "v = " + str(round(node.v * 3.6, 2)))
-        plt.pause(0.001)
-
-    plt.show()
-    '''
-
-if __name__ == '__main__':
-    main()
-"""

@@ -27,7 +27,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
     for n in tqdm(range(N_iter)): # Max N_iter iterations
         if n == 1: # First iteration, pick the goal node to try if an easy path already exists
             sampled_Node = goal_Node
-        elif star and n == N_iter - 5: # For RRT*, pick the goal node as the last node to improve convergence chances
+        elif star and n == N_iter - 1: # For RRT*, pick the goal node as the last node to improve convergence chances
             sampled_Node = goal_Node
         elif not star and np.random.random_sample() < 0.05: # For normal RRT, have a chance of picking the goal node as the sampled node
             sampled_Node = goal_Node
@@ -58,7 +58,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
             sampled_Node.cost = parent_Node.cost + path_to_parent.length 
 
             if star: # If RRT* is used, the sampled Node will be connected to the best nearby node
-                radius = 10  # Within a certain radius, find nearby points
+                radius = 20  # Within a certain radius, find nearby points
                 Nodes_near_sample = find_nearby_nodes(start_Node, sampled_Node, radius, nearby_Nodes=[])
 
                 if Nodes_near_sample: # If there are nearby nodes
