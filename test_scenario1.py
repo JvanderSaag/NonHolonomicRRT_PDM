@@ -16,9 +16,9 @@ simple_Scenario.set_vehicle(1/4.39, 4.5, 2) # vehicle must be set before obstacl
 simple_Scenario.set_obstacles(obstacles)
 simple_Scenario.set_start_goal(start, start_yaw, goal, goal_yaw)
 
-RRT(2500, simple_Scenario, backwards=True)
+#RRT(2500, simple_Scenario, backwards=True)
 
-simple_Scenario.write_csv('test1')
+#simple_Scenario.write_csv('test2')
 #simple_Scenario.read_csv('test1', set_path=True)
 
-simple_Scenario.plot_scenario()
+#simple_Scenario.plot_scenario()

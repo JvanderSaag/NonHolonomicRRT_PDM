@@ -1,6 +1,7 @@
 import os
 import sys
 import numpy as np
+import matplotlib.patches
 import matplotlib.pyplot as plt
 import math
 import Controller
@@ -11,7 +12,7 @@ sys.path.append('../NonHolonomicRRT_PDM')
 from test_scenario1 import simple_Scenario
 
 def main():
-    cx, cy, cyaw = simple_Scenario.read_csv('test1', set_path=True)
+    cx, cy, cyaw = simple_Scenario.read_csv('test2', set_path=True)
 
     sp = Controller.calc_speed_profile(cx, cy, cyaw, Controller.P.target_speed)
 
@@ -62,6 +63,18 @@ def main():
         
         plt.cla()
         draw.draw_car(node.x, node.y, node.yaw, steer, Controller.P)
+        for obstacle in simple_Scenario.obstacles:
+            plt.gca().add_patch(matplotlib.patches.Polygon(obstacle.exterior.coords, color="grey"))
+
+        if simple_Scenario.start is not None and simple_Scenario.goal is not None:
+            if simple_Scenario.vehicle_length != 0 and simple_Scenario.vehicle_width != 0: # If the vehicle size has been set, draw start and goal as vehicle
+                plt.gca().add_patch(matplotlib.patches.Rectangle((simple_Scenario.start[0].x - Controller.P.RB, simple_Scenario.start[0].y - simple_Scenario.vehicle_width / 2),
+                                                            simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.start[1], color='red', alpha=0.8, label='Start', rotation_point='center'))
+                plt.gca().add_patch(matplotlib.patches.Rectangle((simple_Scenario.goal[0].x - Controller.P.RB, simple_Scenario.goal[0].y - simple_Scenario.vehicle_width / 2), 
+                                                            simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.goal[1], color='green', alpha=0.8, label='Goal', rotation_point='center'))
+            else: # Draw start and goal as points
+                plt.scatter(simple_Scenario.start[0].x, simple_Scenario.start[0].y, s=50, c='g', marker='o', label='Start')
+                plt.scatter(simple_Scenario.goal[0].x, simple_Scenario.goal[0].y, s=60, c='r', marker='*', label='Goal')
         plt.gcf().canvas.mpl_connect('key_release_event',
                                      lambda event:
                                      [exit(0) if event.key == 'escape' else None])
@@ -73,7 +86,7 @@ def main():
         plt.plot(x, y, '-b')
         plt.plot(cx[target_ind], cy[target_ind])
         plt.axis("equal")
-        plt.title("Linear MPC, " + "v = " + str(round(node.v * 3.6, 2)))
+        #plt.title("Linear MPC, " + "v = " + str(round(node.v * 3.6, 2)))
         plt.pause(0.001)
 
     plt.show()
