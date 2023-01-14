@@ -28,8 +28,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
     for n in tqdm(range(N_iter)): # Max N_iter iterations
         if n == 1: # First iteration, pick the goal node to try if an easy path already exists
             sampled_Node = goal_Node
-
-        elif star and n > N_iter - 5: # For RRT*, pick the goal node as the last few nodes to improve convergence chances
+        elif star and n == N_iter - 1: # For RRT*, pick the goal node as the last node to improve convergence chances
             sampled_Node = goal_Node
         elif not star and np.random.random_sample() < 0.05: # For normal RRT, have a chance of picking the goal node as the sampled node
             sampled_Node = goal_Node
@@ -37,7 +36,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
             sampled_Node = TreeNode(rand_coords(scenario.width, scenario.height), np.deg2rad(np.random.randint(0, 360,1))[0])
            
             # Random chance to orient point to goal, only if sampled point is not the goal
-            if not sampled_Node.point.equals(goal_Node.point) and np.random.random_sample() < 0.05:
+            if not sampled_Node.point.equals(goal_Node.point) and np.random.random_sample() < 0.1:
                 angle_to_goal = (np.degrees(np.arctan2((goal_Node.point.y - sampled_Node.point.y), (goal_Node.point.x - sampled_Node.point.x))) + 360) % 360
                 sampled_Node.yaw = angle_to_goal
 
