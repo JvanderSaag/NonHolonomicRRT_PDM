@@ -21,8 +21,8 @@ class P:
     T = 6  # finite time horizon length
 
     # MPC config
-    Q = np.diag([1.0, 1.0, 1.0, 1.0])  # penalty for states
-    Qf = np.diag([1.0, 1.0, 1.0, 1.0])  # penalty for end state
+    Q = np.diag([10.0, 10.0, 5.0, 5.0])  # penalty for states
+    Qf = np.diag([10.0, 10.0, 1.0, 1.0])  # penalty for end state
     R = np.diag([0.01, 0.1])  # penalty for inputs
     Rd = np.diag([0.01, 0.1])  # penalty for change of inputs
 
@@ -37,11 +37,11 @@ class P:
     du_res = 0.1  # threshold for stopping iteration
 
     # vehicle config
-    RF = 3.7  # [m] distance from rear to vehicle front end of vehicle
-    RB = 0.8  # [m] distance from rear to vehicle back end of vehicle
+    RF = 3.9  # [m] distance from rear to vehicle front end of vehicle
+    RB = 0.6  # [m] distance from rear to vehicle back end of vehicle
     W = 2  # [m] width of vehicle
     WD = 0.7 * W  # [m] distance between left-right wheels
-    WB = 2.9  # [m] Wheel base
+    WB = 3.3  # [m] Wheel base
     TR = 0.44  # [m] Tyre radius
     TW = 0.7  # [m] Tyre width
 
