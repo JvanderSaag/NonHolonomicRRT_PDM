@@ -12,11 +12,11 @@ Scenario1.set_vehicle(1/4.39, 4.5, 2)  # Max curvature, length, width
 # Create obstacles
 ObstacleCreator = ObstacleCreator()
 #obstacleCreator.create_rectangle(5, 40, (0, 0))
-ObstacleCreator.create_rectangle(10, 40, (16, 0))
+ObstacleCreator.create_rectangle(10, 40, (16.5, 0))
 ObstacleCreator.create_rectangle(2, 4.5, (12, 1))
 ObstacleCreator.create_rectangle(2, 4.5, (12, 7))
-ObstacleCreator.create_rectangle(2, 4.5, (12, 19))
-ObstacleCreator.create_rectangle(2, 4.5, (12, 33))
+ObstacleCreator.create_rectangle(2, 4.5, (12, 18.5))
+ObstacleCreator.create_rectangle(2, 4.5, (12, 33.5))
 obstacles = ObstacleCreator.return_obstacles()
 
 # Set obstacles in scenario
@@ -28,12 +28,12 @@ goal, goal_yaw = (13, 28.25), 90
 Scenario1.set_start_goal(start, start_yaw, goal, goal_yaw)
 
 # Perform RRT
-RRT(2000, Scenario1, force_return_tree=True)
+RRT(1000, Scenario1, force_return_tree=True)
 
 
-#Scenario1.read_csv("test1")
+#Scenario1.read_csv("ReedsSchepp")
 # Plot scenario
 Scenario1.plot_scenario(plot_all_trees=True)
 
 # # Save scenario
-Scenario1.write_csv("ReedsSchepp")
+##Scenario1.write_csv("ReedsSchepp")
