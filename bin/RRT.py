@@ -197,7 +197,6 @@ def find_nearby_nodes(start_Node, goal_Node, tol, nearby_Nodes=[]): # Find Nodes
         for child in start_Node.children: # For each child
             if child.point.distance(goal_Node.point) < tol: # If the child is within the tolerated distance of goal node
                 nearby_Nodes.append(child) # Add the node to the nearby_Nodes list
-                print(child.point.coords[:], child.parent.point.coords[:])
             find_nearby_nodes(child, goal_Node, tol, nearby_Nodes) # Recursively repeat over all its children
     return nearby_Nodes
 
