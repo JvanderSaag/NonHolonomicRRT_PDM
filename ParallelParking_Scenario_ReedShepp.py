@@ -36,4 +36,4 @@ RRT(1000, Scenario1, force_return_tree=True)
 Scenario1.plot_scenario(plot_all_trees=True)
 
 # # Save scenario
-Scenario1.write_csv("ReedsSchepp")
+Scenario1.write_csv("ReedsShepp")
