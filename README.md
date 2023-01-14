@@ -1,7 +1,9 @@
 # NonHolonomicRRT_PDM
-Implementation of a RRT algorithm for a non-holonomic parking robot, created for the course Planning &amp; Decision Making (RO47005) at the Technische Universiteit Delft.
+Implementation of a RRT* algorithm for a non-holonomic parking robot, created for the course Planning &amp; Decision Making (RO47005) at the Technische Universiteit Delft.
+This project uses a modified version of RRT* with Reeds Shepp and Dubins connectors.
 
 
+to be removed:
 return_coordinates of the scenario class returns the coordinates of all obstacles (a list of list, each nested list is another obstacle), the coordinates of the path (with linear segments connecting each point), the coordinate of the start, and the coordinate of the goal. All coordinates are given as (x, y), with the origin being at the bottom left of the environment.
 
 To access the gym env: 
@@ -12,7 +14,7 @@ Install poetry: https://python-poetry.org/docs/
 Run poetry via: $poetry shell
 
 # Description
-
+The project main objective is to demonstrate the difference in efficiency for varying non-holonomic connectors as well as the difference in computation time. Furthermore a simple an MPC controller was added in order to visualise a vehicle following the calculated path.
 ## Files
 The project is structured in multiple folders and files. 
 
