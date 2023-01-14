@@ -91,7 +91,8 @@ class Scenario:
         path_coords = []
         for segment in self.path[::-1]:
             x, y = np.array(list(zip(*segment.coords))[0]),np.array(list(zip(*segment.coords))[1]) # Get x and y values from linestring segment
-            yaw = np.deg2rad((np.degrees(np.arctan2(np.diff(y), np.diff(x))) + 360) % 360)# Find yaw / derivative
+            #yaw = np.deg2rad((np.degrees(np.arctan2(np.diff(y), np.diff(x))) + 360) % 360)# Find yaw / derivative
+            yaw = np.arctan2(np.diff(y), np.diff(x))
             for idx, coord in enumerate(segment.coords[:-1]): # Exclude last coordinate, same as first one of next segment
                 path_coords.append((round(coord[0], 3), round(coord[1], 3), round(yaw[idx], 3))) # Round coordinates to 3 dec places 
         return path_coords
