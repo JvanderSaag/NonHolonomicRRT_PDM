@@ -26,12 +26,15 @@ start, start_yaw = (5, 5), 90
 goal, goal_yaw = (13, 28.25), 90
 Scenario1.set_start_goal(start, start_yaw, goal, goal_yaw)
 
-# Perform RRT
-#RRT(5000, Scenario1, backwards=False, force_return_tree=True)
+Run = False
+if Run:
 
-Scenario1.read_csv("Dubin")
-# Plot scenario
-Scenario1.plot_scenario(plot_all_trees=True)
+    # Perform RRT
+    RRT(5000, Scenario1, backwards=False, force_return_tree=True)
+    # Plot scenario
+    Scenario1.plot_scenario(plot_all_trees=True)
 
-# # Save scenario
-#Scenario1.write_csv("Dubin")
+    # Save scenario
+    Scenario1.write_csv("Dubin")
+
+#Scenario1.read_csv("Dubin")
