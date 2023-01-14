@@ -1,7 +1,9 @@
 # NonHolonomicRRT_PDM
-Implementation of a RRT algorithm for a non-holonomic parking robot, created for the course Planning &amp; Decision Making (RO47005) at the Technische Universiteit Delft.
+Implementation of a RRT* algorithm for a non-holonomic parking robot, created for the course Planning &amp; Decision Making (RO47005) at the Technische Universiteit Delft.
+This project uses a modified version of RRT* with Reeds Shepp and Dubins connectors.
 
 
+to be removed:
 return_coordinates of the scenario class returns the coordinates of all obstacles (a list of list, each nested list is another obstacle), the coordinates of the path (with linear segments connecting each point), the coordinate of the start, and the coordinate of the goal. All coordinates are given as (x, y), with the origin being at the bottom left of the environment.
 
 To access the gym env: 
@@ -12,7 +14,7 @@ Install poetry: https://python-poetry.org/docs/
 Run poetry via: $poetry shell
 
 # Description
-
+The project main objective is to demonstrate the difference in efficiency for varying non-holonomic connectors as well as the difference in computation time. Furthermore a simple an MPC controller was added in order to visualise a vehicle following the calculated path.
 ## Files
 The project is structured in multiple folders and files. 
 
@@ -38,32 +40,37 @@ This folder contains old version of certain part of the code and are'nt supporte
 
 # Dependencies
 The following packages are needed to run this project:
-
-- math
-- [shapely](https://shapely.readthedocs.io/en/stable/manual.html)
-- [matplotlib](https://pypi.org/project/matplotlib/)
-- [numpy](https://numpy.org/)
-- [tqdm](https://github.com/tqdm/tqdm)
+- matplotlib  
+- numpy  
+- pandas 
+- pip
+- python
+- wheel 
+- scipy
+- pygame
+- cvxpy
+- shapely
+- tqdm
 
 This project was made using the latest version of these packages. The correct functionment of this program is not garantied with earlier versions of these packages.
 
 # Installation
-We recommend using a virtual environment to execute these scripts. The repository contains a conda environment.yaml file (if you use anaconda) and a requirements.txt file (if you use python virtual environments). These environments can be created as follows.
+We recommend using a virtual environment to execute these scripts. The repository contains a conda environment.yaml file. The environment can be created as follows.
 
-## For Anaconda
-- Download and install Anaconda 
+- Download and install Anaconda (if you do not use conda, you can also just make a python virtual environment with the packages mentioned in dependecies)
 - Open Anaconda Prompt (Anaconda3) or your preferred terminal program (in case you use linux)
 - In the terminal use cd to the directory where you extracted the folder
 - Follow these commands
+
+```
 $ conda env create -f environment.yml
+
 $ python -m ipykernel install --user --name=python3
+
+$ conda activate group13_pdm_project
+```
 - Execute any of the provided test scenarios
 
-## For Python VEnvs
-- Follow the same process up until the commands
-- Follow these commands
-$ python -m pip install -r requirements.txt
-- Execute any of the provided test scenarios
 
 # Usage
 In order to understand how to run this project scenarios were provided pre-built and only require to be ran to work.
@@ -127,11 +134,12 @@ In order to save a scenario add the following line after running RRT:
 
 `simple_Scenario.write_csv('example_name')` 
 
-And in the same scenario file previous path can be read from the file by using:
+After a path has been saved, it can be read and plotted without running the RRT function. If a saved path 
+is to be loaded, remove the RRT() and write_csv() functions from the scenario file, and use:
 
- `simple_Scenario.read_csv('example_name', set_path=True)`
+ `simple_Scenario.read_csv('example_name')`
  
-In this case there is no need to run the RRT function before.
+In order to read the saved path. 
 # References
 
 Reeds Shepp curves planning implemented using existing code authored by Atsushi Sakai. The code was modified in order to output paths compatible with our implementation of RRT, and also features were added in order to increase the flexibility of the code. (https://github.com/AtsushiSakai/PythonRobotics/blob/master/PathPlanning/ReedsSheppPath/reeds_shepp_path_planning.py)

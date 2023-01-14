@@ -9,6 +9,7 @@ import matplotlib.transforms
 import numpy as np
 import pandas as pd
 import os
+from math import isclose
 
 class Scenario:
     def __init__(self, name, env_width, env_height, boundary_collision=False):
@@ -36,7 +37,7 @@ class Scenario:
     def set_start_goal(self, start, yaw_start, goal, yaw_goal):
         # Set start and goal, and assert datatype is correct
         assert not isinstance(start, shapely.geometry.Point) and not isinstance(goal, shapely.geometry.Point), "AssertError: Changed this to be a tuple, less imports that way, sorry m8" 
-        self.start, self.goal = (shapely.geometry.Point(start[0], start[1]), yaw_start), (shapely.geometry.Point(goal[0], goal[1], yaw_goal), yaw_goal)
+        self.start, self.goal = (shapely.geometry.Point(start[0], start[1]), yaw_start), (shapely.geometry.Point(goal[0], goal[1]), yaw_goal)
         pass
 
     def set_obstacles(self, obstacles):
@@ -64,8 +65,8 @@ class Scenario:
         self.vehicle_width = width
 
         # Re-buffer obstacles, in case the vehicle size was set before
-        buffer_size = np.sqrt((self.vehicle_length/2)**2 + (self.vehicle_width/2)**2) # Diagonal from center to corner
-        self.buffered_obstacles = [obstacle.buffer(1.1 * buffer_size, cap_style=1) for obstacle in self.obstacles]
+        buffer_size = self.vehicle_length / 2 # Vehicle length is the buffer
+        self.buffered_obstacles = [obstacle.buffer(1.05 * buffer_size, cap_style=1) for obstacle in self.obstacles]
         pass
 
     def collision_free(self, object): # Check if given path/points object from RRT is collision_free
@@ -88,13 +89,45 @@ class Scenario:
     # Coordinate system is x, y starting from bottom left
     def return_path_coords(self):
         # Get the coordinats of the path, return
-        path_coords = []
+        x, y, yaws =  [], [], []
         for segment in self.path[::-1]:
-            x, y = np.array(list(zip(*segment.coords))[0]),np.array(list(zip(*segment.coords))[1]) # Get x and y values from linestring segment
-            #yaw = np.deg2rad((np.degrees(np.arctan2(np.diff(y), np.diff(x))) + 360) % 360)# Find yaw / derivative
-            yaw = np.arctan2(np.diff(y), np.diff(x))
-            for idx, coord in enumerate(segment.coords[:-1]): # Exclude last coordinate, same as first one of next segment
-                path_coords.append((round(coord[0], 3), round(coord[1], 3), round(yaw[idx], 3))) # Round coordinates to 3 dec places 
+            x += list(zip(*segment.coords))[0]
+            y += list(zip(*segment.coords))[1] # Get x and y values from linestring segment
+            
+        yaws += np.degrees(np.arctan2(np.diff(y), np.diff(x))).tolist() # Find yaw / derivative
+        yaws.insert(0, self.start[1]) # Add starting orientation
+
+        # Yaw always points in direction of travel, while vehicle can reverse. This check is for when the vehicle reverses, to keep yaw facing forwards
+        # Initialise reversing to the correct direction
+        if isclose(yaws[0], self.start[1], abs_tol=10):
+            reversing = False
+        else:
+            reversing = True
+
+        reversing_yaws, timer = np.empty((len(yaws), 2)), 0
+        reversing_yaws[0][0], reversing_yaws[0][1] = yaws[0], reversing # set first value equal to starting orientation
+        for idx, yaw in enumerate(yaws):
+            if idx not in [0, len(yaws) - 1]: # Do not check the first and last entry, indexing error
+                diff = abs(yaws[idx-1] - yaws[idx+1])
+                if diff > 180:
+                    diff = 360 - diff
+                if diff > 30 and isclose(yaw, 0, abs_tol=10):
+                    reversing = not reversing 
+
+                # Change angle depending on reversing
+                yaw_360 = (yaw + 360) % 360 # convert to different coordinate system [0, 360] instead of [-180, 180]
+                if reversing: # If it is reversing, flip the yaw angle
+                    reversing_yaws[idx][0] = ((yaw_360 + 180) % 360)
+                else: # keep the same value
+                    reversing_yaws[idx][0] = yaw_360
+                timer -= 1 # reduce timer
+                reversing_yaws[idx][1] = reversing
+        reversing_yaws[-1] = reversing_yaws[-2] # set last value equal to second-to-last value
+
+        # Create total path coords list
+        path_coords = []
+        for idx in range(len(x)): # Exclude last coordinate, same as first one of next segment
+            path_coords.append((round(x[idx], 3), round(y[idx], 3), round(reversing_yaws[idx][0], 3), reversing_yaws[idx][1])) # Round coordinates to 3 dec places 
         return path_coords
 
     # Return coordinates of obstacles, start and goal in that order
@@ -110,13 +143,12 @@ class Scenario:
         return (self.width, self.height)
 
     def plot_scenario(self, plot_all_trees=False): # Plot the scenario in matplotlib
-        fig, ax = plt.subplots()
+        px = 1/plt.rcParams['figure.dpi']
+        fig, ax = plt.subplots(figsize=(900*px, 900*px))
 
-        # Set size of plot using environment size
-        ratio = self.height / self.width
-        fig.set_figheight(ratio * 7)
-        fig.set_figwidth((1 / ratio) * 7)
-
+        # Set size of plot with correct aspect
+        ax.set_aspect(aspect=1)
+        
         # Set boundaries for drawing scenario
         plt.xlim([0, self.width])
         plt.ylim([0, self.height])
@@ -158,8 +190,12 @@ class Scenario:
         pass
     
     def write_csv(self, name): # Function to write csv file
+        if len(self.path) == 0: # Check if path exists
+            print("No path found, cannot be set")
+            return None
+
         path_coord = np.array(self.return_path_coords()).T # Obtain the x, y coordinates and yaw of each point
-        dataframe = pd.DataFrame({'x_coord': path_coord[0], 'y_coord':path_coord[1], 'yaw':path_coord[2]}) # create a panda dataframe
+        dataframe = pd.DataFrame({'x_coord': path_coord[0], 'y_coord':path_coord[1], 'yaw':path_coord[2], 'reversing':path_coord[3]}) # create a panda dataframe
         if find(f'{self.name}_Path_{name}'): # Check if file to be saved already exists
             print("this file already exists are you sure you want to overwrite it?(y/n)") # ask if file should be overwritten
             validation = input()
@@ -174,11 +210,11 @@ class Scenario:
 
     def read_csv(self, name, set_path=True): # Read csv file if set_path is true the path of the scenario will be set from the csv data
         dataset = pd.read_csv(f"./Saved_scenarios/{self.name}_Path_{name}", index_col=[0]) # Obtain pandas dataframe from csv
-        x, y, yaw = dataset['x_coord'].values.tolist(), dataset['y_coord'].values.tolist(), dataset['yaw'].values.tolist()
+        x, y, yaw, reversing = dataset['x_coord'].values.tolist(), dataset['y_coord'].values.tolist(), dataset['yaw'].values.tolist(), dataset['reversing'].values.tolist()
         if set_path: # If the path was to be set from csv 
             coord = np.array([x,y]).T
             self.path = [shapely.geometry.LineString(coord)] # Create path with shapely object
-        return x, y, yaw # return csv data in lists
+        return x, y, yaw, reversing # return csv data in lists
 
 def find(name): # function used to find file in saved scenario folder
     for root, dirs, files in os.walk('./Saved_scenarios'):
