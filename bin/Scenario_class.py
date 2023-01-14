@@ -143,13 +143,12 @@ class Scenario:
         return (self.width, self.height)
 
     def plot_scenario(self, plot_all_trees=False): # Plot the scenario in matplotlib
-        fig, ax = plt.subplots()
+        px = 1/plt.rcParams['figure.dpi']
+        fig, ax = plt.subplots(figsize=(900*px, 900*px))
 
-        # Set size of plot using environment size
-        ratio = self.height / self.width
-        fig.set_figheight(ratio * 7)
-        fig.set_figwidth((1 / ratio) * 7)
-
+        # Set size of plot with correct aspect
+        ax.set_aspect(aspect=1)
+        
         # Set boundaries for drawing scenario
         plt.xlim([0, self.width])
         plt.ylim([0, self.height])
