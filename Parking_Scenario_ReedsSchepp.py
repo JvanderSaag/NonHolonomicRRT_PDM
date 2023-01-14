@@ -39,4 +39,4 @@ RRT(2000, simple_Scenario, force_return_tree=True)
 
 #simple_Scenario.read_csv('ReedsShepp_11.15_2k', set_path=True)
 simple_Scenario.plot_scenario(plot_all_trees=True)
-simple_Scenario.write_csv('Dubins_star')
+simple_Scenario.write_csv('ReedsShepp')
