@@ -18,7 +18,7 @@ simple_Scenario.set_start_goal(start, start_yaw, goal, goal_yaw)
 
 RRT(2500, simple_Scenario, backwards=True)
 
-#simple_Scenario.write_csv('test1')
+simple_Scenario.write_csv('test1')
 #simple_Scenario.read_csv('test1', set_path=True)
 
-#simple_Scenario.plot_scenario()
+simple_Scenario.plot_scenario()
