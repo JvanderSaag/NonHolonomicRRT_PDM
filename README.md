@@ -38,6 +38,7 @@ The following packages are needed to run this project:
 - scipy
 - pygame
 - cvxpy
+- cvxopt
 - shapely
 - tqdm
 
