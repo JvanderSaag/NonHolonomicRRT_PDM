@@ -110,6 +110,3 @@ def run_sim(simple_Scenario, name):
     print(f"Length of Planned Trajectory: {simulated_path.length}")
 
     plt.show()
-    
-
-
