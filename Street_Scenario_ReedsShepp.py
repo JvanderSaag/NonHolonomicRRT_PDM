@@ -26,5 +26,5 @@ if Run:
   TestScenario.plot_scenario(plot_all_trees=True)
   TestScenario.write_csv('ReedsShepp') 
 
-TestScenario.read_csv('ReedsShepp_12.56_2k')
+#TestScenario.read_csv('ReedsShepp_12.56_2k')
 TestScenario.plot_scenario()

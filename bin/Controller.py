@@ -23,7 +23,7 @@ class P:
     R = np.diag([0.01, 0.2])  # penalty for inputs
     Rd = np.diag([0.01, 0.1])  # penalty for change of inputs
 
-    dist_stop = 0.15  # stop permitted when dist to goal < dist_stop
+    dist_stop = 0.7  # stop permitted when dist to goal < dist_stop
     speed_stop = 0.5 / 3.6  # stop permitted when speed < speed_stop
     time_max = 500.0  # max simulation time
     iter_max = 5  # max iteration
