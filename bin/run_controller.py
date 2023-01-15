@@ -69,6 +69,7 @@ def run_sim(simple_Scenario, name):
         plt.xlim([0, simple_Scenario.width])
         plt.ylim([[0, simple_Scenario.height]])
 
+
         draw.draw_car(node.x, node.y, node.yaw, steer, Controller.P)
         for obstacle in simple_Scenario.obstacles:
             obstacle = affinity.translate(obstacle, yoff = (simple_Scenario.vehicle_length/2 - Controller.P.RB))
