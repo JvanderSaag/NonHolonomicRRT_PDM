@@ -14,17 +14,17 @@ ObstacleCreator.create_rectangle(20, 25, (25,37))
 obstacles = ObstacleCreator.return_obstacles()
 start, start_yaw, goal, goal_yaw = (18, 5), 90, (52.5, 45), 90
 
-simple_Scenario = Scenario("Street_Scenario", env_width=60, env_height=50, boundary_collision=False)
-simple_Scenario.set_obstacles(obstacles)
-simple_Scenario.set_start_goal(start, start_yaw, goal, goal_yaw)
-simple_Scenario.set_vehicle(1/4.39, width=2, length=4.5)
+TestScenario = Scenario("Street_Scenario", env_width=60, env_height=50, boundary_collision=False,)
+TestScenario.set_vehicle(1/4.39, width=2, length=4.5)
+TestScenario.set_obstacles(obstacles)
+TestScenario.set_start_goal(start, start_yaw, goal, goal_yaw)
 
 Run = False
 
 if Run:
-  RRT(4000, simple_Scenario, force_return_tree=True)
-  simple_Scenario.plot_scenario(plot_all_trees=True)
-  simple_Scenario.write_csv('ReedsShepp') 
+  RRT(2000, TestScenario, force_return_tree=True, step_size=10)
+  TestScenario.plot_scenario(plot_all_trees=True)
+  TestScenario.write_csv('ReedsShepp') 
 
-#simple_Scenario.read_csv('ReedsShepp_11.13_4k')
-   
+TestScenario.read_csv('ReedsShepp_12.56_2k')
+TestScenario.plot_scenario()

@@ -29,15 +29,16 @@ for i in range(12):
 obstacles = ObstacleCreator.return_obstacles()
 start, start_yaw, goal, goal_yaw = (16, 2.75), 90, (19, 46.75), 90
 
-simple_Scenario = Scenario("Parking_Scenario", env_width=50, env_height=50, boundary_collision=False)
-simple_Scenario.set_obstacles(obstacles)
-simple_Scenario.set_start_goal(start, start_yaw, goal, goal_yaw)
-simple_Scenario.set_vehicle(1/4.39, 4.5, 2)
+TestScenario = Scenario("Parking_Scenario", env_width=50, env_height=50, boundary_collision=False)
+TestScenario.set_obstacles(obstacles)
+TestScenario.set_start_goal(start, start_yaw, goal, goal_yaw)
+TestScenario.set_vehicle(1/4.39, 4.5, 2)
 
 Run = False
 if Run:
-    RRT(20000, simple_Scenario, star=True, backwards=False, force_return_tree=True, step_size=20)
-    simple_Scenario.plot_scenario(plot_all_trees=True)
-    simple_Scenario.write_csv('Dubins_star')
+    RRT(20000, TestScenario, star=True, backwards=False, force_return_tree=True, step_size=20)
+    TestScenario.plot_scenario(plot_all_trees=True)
+    TestScenario.write_csv('Dubins')
 
-#simple_Scenario.read_csv('ReddsShepp_star_11.15_2k', set_path=True)
+TestScenario.read_csv('Dubins_5.25_5k', set_path=True)
+TestScenario.plot_scenario()

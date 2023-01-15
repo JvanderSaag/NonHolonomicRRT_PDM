@@ -14,16 +14,16 @@ ObstacleCreator.create_rectangle(20, 25, (25,37))
 obstacles = ObstacleCreator.return_obstacles()
 start, start_yaw, goal, goal_yaw = (18, 5), 90, (52.5, 45), 90
 
-simple_Scenario = Scenario("Street_Scenario", env_width=60, env_height=50, boundary_collision=False)
-simple_Scenario.set_obstacles(obstacles)
-simple_Scenario.set_start_goal(start, start_yaw, goal, goal_yaw)
-simple_Scenario.set_vehicle(1/4.39, width=2, length=4.5)
+TestScenario = Scenario("Street_Scenario", env_width=60, env_height=50, boundary_collision=False)
+TestScenario.set_vehicle(1/4.39, width=2, length=4.5)
+TestScenario.set_obstacles(obstacles)
+TestScenario.set_start_goal(start, start_yaw, goal, goal_yaw)
   
 Run = False
 if Run:
+    RRT(20000, TestScenario, star=True, backwards=False, force_return_tree=True, step_size=20)
+    TestScenario.plot_scenario(plot_all_trees=True)
+    TestScenario.write_csv('Dubins')    
 
-    RRT(20000, simple_Scenario, star=True, backwards=False, force_return_tree=True, step_size=20)
-    simple_Scenario.plot_scenario(plot_all_trees=True)
-    simple_Scenario.write_csv('Dubins')    
-
-#simple_Scenario.read_csv('Dubins_39.54_20k', set_path=True)
+TestScenario.read_csv('Dubins_39.54_20k', set_path=True)
+TestScenario.plot_scenario()
