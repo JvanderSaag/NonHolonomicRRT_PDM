@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.patches
 import matplotlib.pyplot as plt
 import math
+from shapely import affinity
 from bin import Controller
 from bin import draw
 
@@ -61,6 +62,7 @@ def run_sim(simple_Scenario, name):
         plt.cla()
         draw.draw_car(node.x, node.y, node.yaw, steer, Controller.P)
         for obstacle in simple_Scenario.obstacles:
+            obstacle = affinity.translate(obstacle, yoff = (simple_Scenario.vehicle_length/2 - Controller.P.RB))
             plt.gca().add_patch(matplotlib.patches.Polygon(obstacle.exterior.coords, color="grey"))
 
         if simple_Scenario.start is not None and simple_Scenario.goal is not None:
