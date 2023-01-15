@@ -9,6 +9,6 @@
 #simple_Scenario
 from bin.run_controller import run_sim
 from Street_Scenario_Dubin import TestScenario
-from csv_utils import csv_keys
+from bin.csv_utils import csv_keys
 
 run_sim(TestScenario, csv_keys["Street_Scenario_Dubin"])
