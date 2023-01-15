@@ -138,12 +138,11 @@ def run_sim(simple_Scenario, name):
     end_time = tt.time()
     print(f"Simulation Time: {-(start_time - end_time)}")
 
-    simulated_path_points = list(zip(x,y))
-    simulated_path = MultiLineString([[simulated_path_points[i], simulated_path_points[i+1]] for i in range(len(simulated_path_points) - 1)])
-    print(f"Length of Planned Trajectory: {simulated_path.length}")
+    path = MultiLineString(simple_Scenario.path)
+    print(f"Length of Planned Trajectory: {path.length}")
 
     simulated_path_points = list(zip(x,y))
     simulated_path = MultiLineString([[simulated_path_points[i], simulated_path_points[i+1]] for i in range(len(simulated_path_points) - 1)])
-    print(f"Length of Planned Trajectory: {simulated_path.length}")
+    print(f"Length of Simulated Trajectory: {simulated_path.length}")
 
     plt.show()
