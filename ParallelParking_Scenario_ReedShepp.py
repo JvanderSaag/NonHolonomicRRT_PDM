@@ -41,5 +41,5 @@ if Run:
 
 
 # Save scenario
-TestScenario.read_csv("ReedsSchepp_43.53_2k")
+#TestScenario.read_csv("ReedsSchepp_43.53_2k")
 TestScenario.plot_scenario()
