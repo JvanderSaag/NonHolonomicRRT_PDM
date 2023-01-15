@@ -58,7 +58,13 @@ def run_sim(simple_Scenario, name):
         dy = (node.yaw - yaw[-2]) / (node.v * Controller.P.dt)
         steer = Controller.pi_2_pi(-math.atan(Controller.P.WB * dy))
         
-        plt.cla()
+        ax = plt.cla()
+        ax.set_aspect(1)
+        
+        # Set boundaries for drawing scenario
+        plt.xlim([0, simple_Scenario.width])
+        plt.ylim([0, simple_Scenario.height])
+
         draw.draw_car(node.x, node.y, node.yaw, steer, Controller.P)
         for obstacle in simple_Scenario.obstacles:
             plt.gca().add_patch(matplotlib.patches.Polygon(obstacle.exterior.coords, color="grey"))
@@ -81,9 +87,10 @@ def run_sim(simple_Scenario, name):
         if x_opt is not None:
             plt.plot(x_opt, y_opt, color='darkviolet', marker='*')
 
-        plt.plot(cx, cy, color='gray')
-        plt.plot(x, y, '-b')
+        plt.plot(cx, cy, color='gray', label='Simulated Path')
+        plt.plot(x, y, '-b', label='Planned Path')
         plt.plot(cx[target_ind], cy[target_ind])
+        plt.legend()
         plt.axis("equal")
         #plt.title("Linear MPC, " + "v = " + str(round(node.v * 3.6, 2)))
         plt.pause(0.001)
