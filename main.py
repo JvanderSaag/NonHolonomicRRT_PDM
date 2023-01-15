@@ -8,6 +8,6 @@
 #Scenario1
 #simple_Scenario
 from bin.run_controller import run_sim
-from Street_Scenario_Dubin import simple_Scenario
+from Street_Scenario_Dubin import TestScenario
 
-run_sim(simple_Scenario, 'Dubins_39.54_20k')
+run_sim(TestScenario, 'Dubins_39.54_20k')
