@@ -41,4 +41,4 @@ if Run:
     TestScenario.write_csv('Dubins')
 
 #TestScenario.read_csv('Dubins_5.25_20k', set_path=True)
-TestScenario.plot_scenario()
+#TestScenario.plot_scenario()

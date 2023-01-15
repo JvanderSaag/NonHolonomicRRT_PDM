@@ -7,12 +7,12 @@ from bin import Controller
 from bin import draw
 import time as tt
 from shapely.geometry import MultiLineString
+from bin.csv_utils import csv_keys
 
 
-#from test_scenario1 import simple_Scenario
 
-def run_sim(simple_Scenario, name):
-    cx, cy, cyaw, reversing = simple_Scenario.read_csv(name, set_path=True)
+def run_sim(simple_Scenario, name, animate=True):
+    cx, cy, cyaw, reversing = simple_Scenario.read_csv(csv_keys[name], set_path=True)
     cyaw = np.deg2rad([-(360-i) if i>180 else i for i in cyaw])
     #cyaw = np.deg2rad(cyaw)
     sp = Controller.calc_speed_profile(cx, Controller.P.target_speed, reversing)
@@ -31,9 +31,9 @@ def run_sim(simple_Scenario, name):
     delta_opt, a_opt = None, None
     a_exc, delta_exc = 0.0, 0.0
     start_time = tt.time()
-
-    animate = False
-
+    if animate:
+        manager=plt.get_current_fig_manager()
+        manager.full_screen_toggle()
     while time2 < Controller.P.time_max:
         z_ref, target_ind = Controller.calc_ref_trajectory_in_T_step(node, ref_path, sp)
 
@@ -96,9 +96,19 @@ def run_sim(simple_Scenario, name):
 
             plt.legend()
             plt.axis("equal")
-            #plt.title("Linear MPC, " + "v = " + str(round(node.v * 3.6, 2)))
+            plt.title(name)
             plt.pause(0.001)
+            
+    end_time = tt.time()
+    print(f"Simulation Time: {-(start_time - end_time)}")
 
+    path = MultiLineString(simple_Scenario.path)
+    print(f"Length of Planned Trajectory: {path.length}")
+
+    simulated_path_points = list(zip(x,y))
+    simulated_path = MultiLineString([[simulated_path_points[i], simulated_path_points[i+1]] for i in range(len(simulated_path_points) - 1)])
+    print(f"Length of Simulated Trajectory: {simulated_path.length}")
+    
     if not animate:
         px = 1/plt.rcParams['figure.dpi']
         fig, ax = plt.subplots(figsize=(900*px, 900*px))
@@ -127,22 +137,14 @@ def run_sim(simple_Scenario, name):
                 else: # Draw start and goal as points
                     plt.scatter(simple_Scenario.start[0].x, simple_Scenario.start[0].y, s=50, c='g', marker='o', label='Start')
                     plt.scatter(simple_Scenario.goal[0].x, simple_Scenario.goal[0].y, s=60, c='r', marker='*', label='Goal')
-    
+
         # Draw path
         plt.plot(cx, cy, color='gray', label='Planned Path')
         plt.plot(x, y, '-b', label='Simulated Path')
-             
+        plt.title(name)     
         plt.legend()
         plt.show()
 
-    end_time = tt.time()
-    print(f"Simulation Time: {-(start_time - end_time)}")
+    
 
-    path = MultiLineString(simple_Scenario.path)
-    print(f"Length of Planned Trajectory: {path.length}")
-
-    simulated_path_points = list(zip(x,y))
-    simulated_path = MultiLineString([[simulated_path_points[i], simulated_path_points[i+1]] for i in range(len(simulated_path_points) - 1)])
-    print(f"Length of Simulated Trajectory: {simulated_path.length}")
-
-    plt.show()
+    #plt.show()

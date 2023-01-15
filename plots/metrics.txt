@@ -1,0 +1,23 @@
+ParallelParking_Scenario_ReedShepp:
+
+Simulation Time: 6.958204507827759
+Length of Planned Trajectory: 32.34521395583736
+Length of Simulated Trajectory: 37.30573895323254
+
+Parking_Scenario_ReedsShepp:
+
+Simulation Time: 10.16652512550354
+Length of Planned Trajectory: 55.73479646848376
+Length of Simulated Trajectory: 58.37954435833641
+
+Street_Scenario_ReedsShepp:
+
+Simulation Time: 13.85628890991211
+Length of Planned Trajectory: 66.46794928434464
+Length of Simulated Trajectory: 71.22806787239526
+
+Street_Scenario_Dubin:
+
+Simulation Time: 9.193309545516968
+Length of Planned Trajectory: 66.0085682365827
+Length of Simulated Trajectory: 70.50987599527377
