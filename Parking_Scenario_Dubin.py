@@ -40,5 +40,5 @@ if Run:
     TestScenario.plot_scenario(plot_all_trees=True)
     TestScenario.write_csv('Dubins')
 
-TestScenario.read_csv('Dubins_5.25_5k', set_path=True)
+#TestScenario.read_csv('Dubins_5.25_20k', set_path=True)
 TestScenario.plot_scenario()

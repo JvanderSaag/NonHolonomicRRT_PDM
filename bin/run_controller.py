@@ -5,6 +5,8 @@ import math
 from shapely import affinity
 from bin import Controller
 from bin import draw
+import time as tt
+from shapely.geometry import MultiLineString
 
 
 #from test_scenario1 import simple_Scenario
@@ -17,7 +19,7 @@ def run_sim(simple_Scenario, name):
     ref_path = Controller.PATH(cx, cy, cyaw)
     node = Controller.Node(x=cx[0], y=cy[0], yaw=cyaw[0], v=0.0)
 
-    time = 0.0
+    time2 = 0.0
     x = [node.x]
     y = [node.y]
     yaw = [node.yaw]
@@ -28,8 +30,8 @@ def run_sim(simple_Scenario, name):
 
     delta_opt, a_opt = None, None
     a_exc, delta_exc = 0.0, 0.0
-
-    while time < Controller.P.time_max:
+    start_time = tt.time()
+    while time2 < Controller.P.time_max:
         z_ref, target_ind = Controller.calc_ref_trajectory_in_T_step(node, ref_path, sp)
 
         z0 = [node.x, node.y, node.v, node.yaw]
@@ -40,13 +42,13 @@ def run_sim(simple_Scenario, name):
             delta_exc, a_exc = delta_opt[0], a_opt[0]
 
         node.update(a_exc, delta_exc, 1.0)
-        time += Controller.P.dt
+        time2 += Controller.P.dt
 
         x.append(node.x)
         y.append(node.y)
         yaw.append(node.yaw)
         v.append(node.v)
-        t.append(time)
+        t.append(time2)
         d.append(delta_exc)
         a.append(a_exc)
 
@@ -89,6 +91,15 @@ def run_sim(simple_Scenario, name):
         plt.axis("equal")
         #plt.title("Linear MPC, " + "v = " + str(round(node.v * 3.6, 2)))
         plt.pause(0.001)
+
+    end_time = tt.time()
+    print(f"Simulation Time: {-(start_time - end_time)}")
+
+    path = MultiLineString(simple_Scenario.path)
+    print(f"Length of Planned Trajectory: {path.length}")
+
+    simulated_path = MultiLineString(list(zip(x,y)))
+    print(f"Length of Planned Trajectory: {simulated_path.length}")
 
     plt.show()
     
