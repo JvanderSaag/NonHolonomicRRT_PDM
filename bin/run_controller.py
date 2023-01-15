@@ -66,8 +66,8 @@ def run_sim(simple_Scenario, name):
         plt.gca().set_aspect(1)
     
         # Set boundaries for drawing scenario
-        plt.gca().set_xlim([0, simple_Scenario.width])
-        plt.gca().set_ylim([[0, simple_Scenario.height]])
+        plt.xlim([0, simple_Scenario.width])
+        plt.ylim([[0, simple_Scenario.height]])
 
         draw.draw_car(node.x, node.y, node.yaw, steer, Controller.P)
         for obstacle in simple_Scenario.obstacles:
