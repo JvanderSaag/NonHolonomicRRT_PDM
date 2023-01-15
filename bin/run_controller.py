@@ -31,6 +31,14 @@ def run_sim(simple_Scenario, name):
     delta_opt, a_opt = None, None
     a_exc, delta_exc = 0.0, 0.0
     start_time = tt.time()
+    
+    ax = plt.gca()
+    ax.set_aspect(1)
+  
+    # Set boundaries for drawing scenario
+    plt.xlim([0, simple_Scenario.width])
+    plt.ylim([0, simple_Scenario.height])
+
     while time2 < Controller.P.time_max:
         z_ref, target_ind = Controller.calc_ref_trajectory_in_T_step(node, ref_path, sp)
 
@@ -61,12 +69,7 @@ def run_sim(simple_Scenario, name):
         dy = (node.yaw - yaw[-2]) / (node.v * Controller.P.dt)
         steer = Controller.pi_2_pi(-math.atan(Controller.P.WB * dy))
         
-        ax = plt.cla()
-        ax.set_aspect(1)
-        
-        # Set boundaries for drawing scenario
-        plt.xlim([0, simple_Scenario.width])
-        plt.ylim([0, simple_Scenario.height])
+        plt.cla()
 
         draw.draw_car(node.x, node.y, node.yaw, steer, Controller.P)
         for obstacle in simple_Scenario.obstacles:
