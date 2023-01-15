@@ -1,9 +1,9 @@
 """ These are the functions used for the RRT* algorithm, running the main RRT() function will
     update the scenario class with the final path. Step size and distance tolerance can both be changed when calling RRT().
+    Authored by Jelmer van der Saag and Hugo Chassagnette for the course RO47005 at TU Delft.
 """
 
 import numpy as np
-import math
 from shapely.geometry import Point, LineString
 from tqdm import tqdm
 from bin.Reeds_Shepp_Curves import reeds_shepp_path_planning
@@ -31,7 +31,7 @@ def RRT(N_iter, scenario, step_size=float('inf'), dist_tolerance=1, star=True, n
             sampled_Node = goal_Node
         elif not star and np.random.random_sample() < 0.05: # For normal RRT, have a chance of picking the goal node as the sampled node
             sampled_Node = goal_Node
-        else:  # Otherwise, randomly sample a point in the environment
+        else:  # Ot herwise, randomly sample a point in the environment
             sampled_Node = TreeNode(rand_coords(scenario.width, scenario.height), np.deg2rad(np.random.randint(0, 360,1))[0])
            
             # Random chance to orient point to goal, only if sampled point is not the goal
