@@ -4,7 +4,7 @@ This project uses a modified version of RRT* with Reeds Shepp and Dubins connect
 
 
 # Description
-The project main objective is to demonstrate an RRT* motion planner for a non-holonomic system, and the difference in performance when using different types of connector functions. Furthermore a simple an MPC controller was added in order to visualise a vehicle following the calculated path.
+The project's main objective is to demonstrate an RRT* motion planner for a non-holonomic system, and the difference in performance when using different types of connector functions. Furthermore a simple an MPC controller was added in order to visualise a vehicle following the calculated path.
 
 ## Files
 The project is structured in multiple folders and files. 
@@ -16,14 +16,12 @@ The results of these scenarios can be saved and loaded with the help of csv file
 The bin folder containts the main content of the project. The files here are the back bone of the RRT and simulation process. The files found in this folder are:
 
 - RRT.py: RRT and RRT* implemention used as a global planner to find trajectories.
-- Scenario_class.py: defines a scenario class in order to set the environment parameters.
-- ObstacleCreator_class.py: class defined to allow ease of use of shapely by user without the need to know how to use the package.
+- Scenario_class.py: Defines a scenario class in order to set the environment parameters.
+- ObstacleCreator_class.py: Class defined to allow ease of use of shapely by user without the need to know how to use the package.
 - Reeds_Shepp_Curves.py: Functions used to connect a new point in RRT using Reeds Shepp curves.
 - dublins_path_planner.py: Functions used to connect a new point in RRT using Dublins curves
-- Controller.py:
-- cubic_splines.py:
-- sim_test_scenario.py:
-- Simulator.py:
+- Controller.py: Functions to implement a simple MPC controller
+- cubic_splines.py: MPC helper functions
 
 ### Legacy folder
 This folder contains old version of certain part of the code and are'nt supported anymore.
@@ -40,17 +38,18 @@ The following packages are needed to run this project:
 - scipy
 - pygame
 - cvxpy
+- cvxopt
 - shapely
 - tqdm
 
-This project was made using the latest version of these packages. The correct functionment of this program is not garantied with earlier versions of these packages.
+This project was made using the latest version of these packages. The correct functioning of this program is not guaranteed with earlier versions of these packages.
 
 # Installation
-We recommend using a virtual environment to execute these scripts. The repository contains a conda environment.yaml file. The environment can be created as follows.
+We recommend using a virtual environment to execute these scripts. The repository contains a conda environment.yml file. The environment can be created as follows.
 
 - Download and install Anaconda (if you do not use conda, you can also just make a python virtual environment with the packages mentioned in dependecies)
-- Open Anaconda Prompt (Anaconda3) or your preferred terminal program (in case you use linux)
-- In the terminal use cd to the directory where you extracted the folder
+- Open Anaconda Prompt (Anaconda3) or your preferred terminal program
+- In the terminal use cd change to the directory where you extracted the folder and where the environment.yml file exits
 - Follow these commands
 
 ```
@@ -60,7 +59,7 @@ $ python -m ipykernel install --user --name=python3
 
 $ conda activate group13_pdm_project
 ```
-- Execute any of the provided test scenarios
+- Execute any of the provided test scenarios or follow the instruction mentioned in the next section
 
 
 # Usage
@@ -68,7 +67,7 @@ In order to understand how to run this project scenarios were provided pre-built
 
 The Example_scenario.py file set's up a simple environment and explains how to expand the scenario and use the various options.
 
-if creating a new scenario ile the following imports are required:
+For creating a new scenario file the following imports are required:
 
 ```
 from bin.ObstacleCreator_class import ObstacleCreator
@@ -76,9 +75,8 @@ from bin.Scenario_class import Scenario
 from shapely.geometry import Point
 from bin.RRT import RRT
 ```
-
-
 The following is a small guide on how the various functions can be used to build a scenario
+
 ## Obstacle creation
 Calling `ObstacleCreator()` initialises the class for the obstacles.
 
@@ -96,12 +94,12 @@ First the scenario class must be initialised with:
 
 `simple_Scenario = Scenario("Example_name", env_width=20, env_height=20, boundary_collision=True)`
 
-When initialising arguments must be provided for the name, width and height of the environement. If it is desired that the boundary of the environement be considered when checking collision witht the vehicule, set `boundary_collision` to True. It is set to False by default.
+When initialising, arguments must be provided for the name, width, and height of the environement. If it is desired that the boundary of the environement be considered when checking collision witht the vehicule, set `boundary_collision` to True. It is set to False by default.
 
 Multiple functions must then be used to set-up the scenario:
 - `simple_Scenario.set_start_goal(start, start_yaw, goal, goal_yaw)`: This sets up the start and goal positions. The yaw values must be in degrees between 0 and 360. The start and goal arguments must be a (x, y) tuple.
 - `simple_Scenario.set_obstacles(obstacles)`: This sets the obstacle by giving it the list of obstacle discussed previously. (setting up obstacles is optionnal)
-- `simple_Scenario.set_vehicle(0.6, width=2, length=4)`: This sets up the vehicule in the scenario class. The first argument is the maximum curve radius of the vehicule. Following this the width and length of the vehicule can be set but if not it will be defaulted to a point. (setting up a cehicule is nto required for the functionning of RRT)
+- `simple_Scenario.set_vehicle(0.6, width=2, length=4)`: This sets up the vehicule in the scenario class. The first argument is the maximum curve radius of the vehicule. Following this the width and length of the vehicle can be set.
 - `simple_Scenario.plot_scenario()`: This allows the plotting of the resulting path. If the entire tree is desired use the argument `plot_all_trees=True`
 
 ## RRT
@@ -130,7 +128,6 @@ is to be loaded, remove the RRT() and write_csv() functions from the scenario fi
 
  `simple_Scenario.read_csv('example_name')`
  
-In order to read the saved path. 
 
 To return the coordinates of the path that are saved in the csv file, the following command can be used:
 
@@ -147,4 +144,4 @@ Dublins curves planning implemented using existing code authored by Huiming Zhou
 
 ## Future work
 - Expanding RRT further in order to provide more options aswell as optimize it's efficiency. 
-- Modifying the vehicules collistion calculation to be more realistic. When checking collision during RRT a circle is drawn around the vehicule. This is a known limitation that makes it impossible to have cars close by even when no collision is happening. 
+- Modifying the vehicles collistion calculation to be more realistic. When checking collision during RRT a circle is drawn around the vehicle. This is a known limitation that makes it impossible to have cars close by even when no collision is happening. 

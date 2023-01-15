@@ -1,5 +1,6 @@
 """ This is the class definition of a scenario in which the planning algorithm is tested.
     Coordinate system used is (x, y), starting in bottom left corner 
+    Authored by Jelmer van der Saag and Hugo Chassagnette for the course RO47005 at TU Delft.
 """
 
 import shapely.geometry
@@ -45,8 +46,8 @@ class Scenario:
         assert all(isinstance(x, shapely.geometry.Polygon) for x in obstacles), "AssertError: Obstacles are not polygons!" 
         self.obstacles = obstacles # define obstacles as list of shapely objects
         
-        buffer_size = np.sqrt((self.vehicle_length/2)**2 + (self.vehicle_width/2)**2) # Diagonal from center to corner
-        self.buffered_obstacles = [obstacle.buffer(1.1 * buffer_size, cap_style=1) for obstacle in self.obstacles]
+        buffer_size = self.vehicle_length/2#np.sqrt((self.vehicle_length/2)**2 + (self.vehicle_width/2)**2) # Diagonal from center to corner
+        self.buffered_obstacles = [obstacle.buffer(1 * buffer_size, cap_style=1) for obstacle in self.obstacles]
         pass
 
     def set_path(self, path):
@@ -65,7 +66,7 @@ class Scenario:
         self.vehicle_width = width
 
         # Re-buffer obstacles, in case the vehicle size was set before
-        buffer_size = self.vehicle_length / 2 # Vehicle length is the buffer
+        buffer_size = np.sqrt((self.vehicle_length/2)**2 + (self.vehicle_width/2)**2) # Vehicle diagonal from center
         self.buffered_obstacles = [obstacle.buffer(1.05 * buffer_size, cap_style=1) for obstacle in self.obstacles]
         pass
 

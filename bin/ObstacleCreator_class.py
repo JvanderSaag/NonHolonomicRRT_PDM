@@ -1,3 +1,6 @@
+""" This function creates obstacles for the Scenario class as Shapely objects.
+    Authored by Jelmer van der Saag and Hugo Chassagnette for the course RO47005 at TU Delft.
+"""
 import shapely.geometry
 
 class ObstacleCreator:

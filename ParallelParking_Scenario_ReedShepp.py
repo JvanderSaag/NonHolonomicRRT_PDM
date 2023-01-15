@@ -27,11 +27,11 @@ start, start_yaw = (5, 5), 90
 goal, goal_yaw = (13, 28.25), 90
 Scenario1.set_start_goal(start, start_yaw, goal, goal_yaw)
 
-Run = False
+Run = True
 if Run:
 
     # Perform RRT
-    RRT(2000, Scenario1, force_return_tree=True)
+    RRT(2000, Scenario1, force_return_tree=True, step_size=10)
 
     # Plot scenario
     Scenario1.plot_scenario(plot_all_trees=True)
@@ -40,5 +40,6 @@ if Run:
     Scenario1.write_csv("ReedsSchepp")
 
 
-# # Save scenario
-#Scenario1.read_csv("ReedsShepp_")
+# Save scenario
+#Scenario1.read_csv("ReedsSchepp_19.29_1k")
+Scenario1.plot_scenario()
