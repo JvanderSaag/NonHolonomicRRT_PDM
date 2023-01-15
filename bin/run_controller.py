@@ -107,28 +107,27 @@ def run_sim(simple_Scenario, name):
         ax.set_aspect(aspect=1)
         
         # Set boundaries for drawing scenario
+        offset =  simple_Scenario.vehicle_length/2 - Controller.P.RB
         plt.xlim([0, simple_Scenario.width])
-        plt.ylim([0, simple_Scenario.height])
+        plt.ylim([0 + offset, simple_Scenario.height + offset])
 
-        # Draw obstacles
         for obstacle in simple_Scenario.obstacles:
-            ax.add_patch(matplotlib.patches.Polygon(obstacle.exterior.coords, color="grey"))
+                obstacle = affinity.translate(obstacle, yoff = (simple_Scenario.vehicle_length/2 - Controller.P.RB))
+                plt.gca().add_patch(matplotlib.patches.Polygon(obstacle.exterior.coords, color="grey"))
         
         # Draw start and goal
         if simple_Scenario.start is not None and simple_Scenario.goal is not None:
-            if simple_Scenario.vehicle_length != 0 and simple_Scenario.vehicle_width != 0: # If the vehicle size has been set, draw start and goal as vehicle
-                ax.add_patch(matplotlib.patches.Rectangle((simple_Scenario.start[0].x - simple_Scenario.vehicle_length / 2, simple_Scenario.start[0].y - simple_Scenario.vehicle_width / 2),
-                                                            simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.start[1], color='red', alpha=0.8, label='Start', rotation_point='center'))
-                ax.add_patch(matplotlib.patches.Rectangle((simple_Scenario.goal[0].x - simple_Scenario.vehicle_length / 2, simple_Scenario.goal[0].y - simple_Scenario.vehicle_width / 2), 
-                                                            simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.goal[1], color='green', alpha=0.8, label='Goal', rotation_point='center'))
-            else: # Draw start and goal as points
-                plt.scatter(simple_Scenario.start[0].x, simple_Scenario.start[0].y, s=50, c='g', marker='o', label='Start')
-                plt.scatter(simple_Scenario.goal[0].x, simple_Scenario.goal[0].y, s=60, c='r', marker='*', label='Goal')
-
-        # Draw boundary, if it exists
-        if simple_Scenario.boundary is not None:
-            plt.plot(*simple_Scenario.boundary.xy, color="k")
-        
+                if simple_Scenario.vehicle_length != 0 and simple_Scenario.vehicle_width != 0: # If the vehicle size has been set, draw start and goal as vehicle
+                #  plt.gca().add_patch(matplotlib.patches.Rectangle((simple_Scenario.start[0].x - Controller.P.RB, simple_Scenario.start[0].y - simple_Scenario.vehicle_width / 2),
+                #                                              simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.start[1], color='red', alpha=0.8, label='Start', rotation_point='center'))
+                    plt.gca().add_patch(matplotlib.patches.Rectangle((simple_Scenario.start[0].x + simple_Scenario.vehicle_width / 2, simple_Scenario.start[0].y - Controller.P.RB),
+                                                                simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.start[1], color='red', alpha=0.8, label='Start', rotation_point='xy'))
+                    plt.gca().add_patch(matplotlib.patches.Rectangle((simple_Scenario.goal[0].x + simple_Scenario.vehicle_width / 2, simple_Scenario.goal[0].y - Controller.P.RB), 
+                                                                simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.goal[1], color='green', alpha=0.8, label='Goal', rotation_point='xy'))
+                else: # Draw start and goal as points
+                    plt.scatter(simple_Scenario.start[0].x, simple_Scenario.start[0].y, s=50, c='g', marker='o', label='Start')
+                    plt.scatter(simple_Scenario.goal[0].x, simple_Scenario.goal[0].y, s=60, c='r', marker='*', label='Goal')
+    
         # Draw path
         plt.plot(cx, cy, color='gray', label='Planned Path')
         plt.plot(x, y, '-b', label='Simulated Path')
@@ -139,8 +138,9 @@ def run_sim(simple_Scenario, name):
     end_time = tt.time()
     print(f"Simulation Time: {-(start_time - end_time)}")
 
-    path = MultiLineString(simple_Scenario.path)
-    print(f"Length of Planned Trajectory: {path.length}")
+    simulated_path_points = list(zip(x,y))
+    simulated_path = MultiLineString([[simulated_path_points[i], simulated_path_points[i+1]] for i in range(len(simulated_path_points) - 1)])
+    print(f"Length of Planned Trajectory: {simulated_path.length}")
 
     simulated_path = MultiLineString(list(zip(x,y)))
     print(f"Length of Planned Trajectory: {simulated_path.length}")
