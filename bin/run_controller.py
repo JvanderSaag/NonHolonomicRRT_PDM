@@ -107,7 +107,8 @@ def run_sim(simple_Scenario, name):
     path = MultiLineString(simple_Scenario.path)
     print(f"Length of Planned Trajectory: {path.length}")
 
-    simulated_path = MultiLineString(list(zip(x,y)))
+    simulated_path_points = list(zip(x,y))
+    simulated_path = MultiLineString([[simulated_path_points[i], simulated_path_points[i+1]] for i in range(len(simulated_path_points) - 1)])
     print(f"Length of Planned Trajectory: {simulated_path.length}")
 
     plt.show()
