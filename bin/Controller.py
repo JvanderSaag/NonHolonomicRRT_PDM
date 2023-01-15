@@ -25,7 +25,7 @@ class P:
 
     dist_stop = 0.7  # stop permitted when dist to goal < dist_stop
     speed_stop = 0.5 / 3.6  # stop permitted when speed < speed_stop
-    time_max = 500.0  # max simulation time
+    time_max = 100.0  # max simulation time
     iter_max = 5  # max iteration
     target_speed = 10.0 / 3.6  # target speed
     N_IND = 10  # search index number

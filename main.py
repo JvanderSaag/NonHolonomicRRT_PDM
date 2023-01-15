@@ -7,8 +7,8 @@
 
 from bin.run_controller import run_sim
 
-from Street_Scenario_Dubin import TestScenario
+from ParallelParking_Scenario_Dubin import TestScenario
 from bin.csv_utils import csv_keys
 
-run_sim(TestScenario, csv_keys["Street_Scenario_Dubin"])
+run_sim(TestScenario, csv_keys["ParallelParking_Scenario_Dubin"])
 
