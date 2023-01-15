@@ -1,4 +1,7 @@
-#Linear MPC controller based on Huiming Zhou's implementation
+'''Linear MPC controller
+author: huiming zhou (https://github.com/zhm-real)
+Modified by Ayush Kulshreshtha
+'''
 
 import os
 import sys
@@ -15,7 +18,7 @@ class P:
     T = 6  # finite time horizon length
 
     # MPC config
-    Q = np.diag([2.0, 2.0, 1.0, 2.0])  # penalty for states
+    Q = np.diag([3.5, 3.5, 1.0, 1.0])  # penalty for states
     Qf = np.diag([5.0, 5.0, 5.0, 5.0])  # penalty for end state
     R = np.diag([0.01, 0.1])  # penalty for inputs
     Rd = np.diag([0.01, 0.1])  # penalty for change of inputs
@@ -294,7 +297,7 @@ def solve_linear_mpc(z_ref, z_bar, z0, d_bar):
     return a, delta, x, y, yaw, v
 
 
-def calc_speed_profile(cx, cy, cyaw, target_speed, reversing):
+def calc_speed_profile(cx, target_speed, reversing):
     """
     design appropriate speed strategy
     :param cx: x of reference path [m]
@@ -318,6 +321,9 @@ def calc_speed_profile(cx, cy, cyaw, target_speed, reversing):
             speed_profile[i] = - target_speed
         else:
             speed_profile[i] = target_speed
+        
+        if reversing[i] != reversing[i+1]:
+            speed_profile[i] = 0.0
 
     speed_profile[-1] = 0.0
 
