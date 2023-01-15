@@ -14,3 +14,4 @@ dependencies:
   - cvxpy
   - shapely
   - tqdm
+  - cvxopt
