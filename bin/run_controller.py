@@ -32,6 +32,8 @@ def run_sim(simple_Scenario, name):
     a_exc, delta_exc = 0.0, 0.0
     start_time = tt.time()
 
+    animate = False
+
     while time2 < Controller.P.time_max:
         z_ref, target_ind = Controller.calc_ref_trajectory_in_T_step(node, ref_path, sp)
 
@@ -62,44 +64,77 @@ def run_sim(simple_Scenario, name):
         dy = (node.yaw - yaw[-2]) / (node.v * Controller.P.dt)
         steer = Controller.pi_2_pi(-math.atan(Controller.P.WB * dy))
         
-        plt.cla()
-        plt.gca().set_aspect(1)
-    
+        if animate:
+            plt.cla()
+
+            draw.draw_car(node.x, node.y, node.yaw, steer, Controller.P)
+            for obstacle in simple_Scenario.obstacles:
+                obstacle = affinity.translate(obstacle, yoff = (simple_Scenario.vehicle_length/2 - Controller.P.RB))
+                plt.gca().add_patch(matplotlib.patches.Polygon(obstacle.exterior.coords, color="grey"))
+
+            if simple_Scenario.start is not None and simple_Scenario.goal is not None:
+                if simple_Scenario.vehicle_length != 0 and simple_Scenario.vehicle_width != 0: # If the vehicle size has been set, draw start and goal as vehicle
+                #  plt.gca().add_patch(matplotlib.patches.Rectangle((simple_Scenario.start[0].x - Controller.P.RB, simple_Scenario.start[0].y - simple_Scenario.vehicle_width / 2),
+                #                                              simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.start[1], color='red', alpha=0.8, label='Start', rotation_point='center'))
+                    plt.gca().add_patch(matplotlib.patches.Rectangle((simple_Scenario.start[0].x + simple_Scenario.vehicle_width / 2, simple_Scenario.start[0].y - Controller.P.RB),
+                                                                simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.start[1], color='red', alpha=0.8, label='Start', rotation_point='xy'))
+                    plt.gca().add_patch(matplotlib.patches.Rectangle((simple_Scenario.goal[0].x + simple_Scenario.vehicle_width / 2, simple_Scenario.goal[0].y - Controller.P.RB), 
+                                                                simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.goal[1], color='green', alpha=0.8, label='Goal', rotation_point='xy'))
+                else: # Draw start and goal as points
+                    plt.scatter(simple_Scenario.start[0].x, simple_Scenario.start[0].y, s=50, c='g', marker='o', label='Start')
+                    plt.scatter(simple_Scenario.goal[0].x, simple_Scenario.goal[0].y, s=60, c='r', marker='*', label='Goal')
+            plt.gcf().canvas.mpl_connect('key_release_event',
+                                        lambda event:
+                                        [exit(0) if event.key == 'escape' else None])
+
+            if x_opt is not None:
+                plt.plot(x_opt, y_opt, color='darkviolet', marker='*')
+
+            plt.plot(cx, cy, color='gray', label='Planned Path')
+            plt.plot(x, y, '-b', label='Simulated Path')
+            plt.plot(cx[target_ind], cy[target_ind])
+
+            plt.legend()
+            plt.axis("equal")
+            #plt.title("Linear MPC, " + "v = " + str(round(node.v * 3.6, 2)))
+            plt.pause(0.001)
+
+    if not animate:
+        px = 1/plt.rcParams['figure.dpi']
+        fig, ax = plt.subplots(figsize=(900*px, 900*px))
+
+        # Set size of plot with correct aspect
+        ax.set_aspect(aspect=1)
+        
         # Set boundaries for drawing scenario
         plt.xlim([0, simple_Scenario.width])
-        plt.ylim([[0, simple_Scenario.height]])
+        plt.ylim([0, simple_Scenario.height])
 
-
-        draw.draw_car(node.x, node.y, node.yaw, steer, Controller.P)
+        # Draw obstacles
         for obstacle in simple_Scenario.obstacles:
-            obstacle = affinity.translate(obstacle, yoff = (simple_Scenario.vehicle_length/2 - Controller.P.RB))
-            plt.gca().add_patch(matplotlib.patches.Polygon(obstacle.exterior.coords, color="grey"))
-
+            ax.add_patch(matplotlib.patches.Polygon(obstacle.exterior.coords, color="grey"))
+        
+        # Draw start and goal
         if simple_Scenario.start is not None and simple_Scenario.goal is not None:
             if simple_Scenario.vehicle_length != 0 and simple_Scenario.vehicle_width != 0: # If the vehicle size has been set, draw start and goal as vehicle
-              #  plt.gca().add_patch(matplotlib.patches.Rectangle((simple_Scenario.start[0].x - Controller.P.RB, simple_Scenario.start[0].y - simple_Scenario.vehicle_width / 2),
-              #                                              simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.start[1], color='red', alpha=0.8, label='Start', rotation_point='center'))
-                plt.gca().add_patch(matplotlib.patches.Rectangle((simple_Scenario.start[0].x + simple_Scenario.vehicle_width / 2, simple_Scenario.start[0].y - Controller.P.RB),
-                                                            simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.start[1], color='red', alpha=0.8, label='Start', rotation_point='xy'))
-                plt.gca().add_patch(matplotlib.patches.Rectangle((simple_Scenario.goal[0].x + simple_Scenario.vehicle_width / 2, simple_Scenario.goal[0].y - Controller.P.RB), 
-                                                            simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.goal[1], color='green', alpha=0.8, label='Goal', rotation_point='xy'))
+                ax.add_patch(matplotlib.patches.Rectangle((simple_Scenario.start[0].x - simple_Scenario.vehicle_length / 2, simple_Scenario.start[0].y - simple_Scenario.vehicle_width / 2),
+                                                            simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.start[1], color='red', alpha=0.8, label='Start', rotation_point='center'))
+                ax.add_patch(matplotlib.patches.Rectangle((simple_Scenario.goal[0].x - simple_Scenario.vehicle_length / 2, simple_Scenario.goal[0].y - simple_Scenario.vehicle_width / 2), 
+                                                            simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.goal[1], color='green', alpha=0.8, label='Goal', rotation_point='center'))
             else: # Draw start and goal as points
                 plt.scatter(simple_Scenario.start[0].x, simple_Scenario.start[0].y, s=50, c='g', marker='o', label='Start')
                 plt.scatter(simple_Scenario.goal[0].x, simple_Scenario.goal[0].y, s=60, c='r', marker='*', label='Goal')
-        plt.gcf().canvas.mpl_connect('key_release_event',
-                                     lambda event:
-                                     [exit(0) if event.key == 'escape' else None])
 
-        if x_opt is not None:
-            plt.plot(x_opt, y_opt, color='darkviolet', marker='*')
-
-        plt.plot(cx, cy, color='gray', label='Simulated Path')
-        plt.plot(x, y, '-b', label='Planned Path')
-        plt.plot(cx[target_ind], cy[target_ind])
+        # Draw boundary, if it exists
+        if simple_Scenario.boundary is not None:
+            plt.plot(*simple_Scenario.boundary.xy, color="k")
+        
+        # Draw path
+        plt.plot(cx, cy, color='gray', label='Planned Path')
+        plt.plot(x, y, '-b', label='Simulated Path')
+             
         plt.legend()
-        plt.axis("equal")
-        #plt.title("Linear MPC, " + "v = " + str(round(node.v * 3.6, 2)))
-        plt.pause(0.001)
+        plt.show()
 
     end_time = tt.time()
     print(f"Simulation Time: {-(start_time - end_time)}")
