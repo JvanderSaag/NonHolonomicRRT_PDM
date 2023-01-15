@@ -38,4 +38,4 @@ if Run:
     TestScenario.write_csv("Dubin")
 
 #TestScenario.read_csv("Dubin_04.26_5k")
-TestScenario.plot_scenario()
+#TestScenario.plot_scenario()

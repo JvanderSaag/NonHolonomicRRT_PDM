@@ -42,4 +42,4 @@ if Run:
     TestScenario.write_csv('ReedsShepp')
 
 #TestScenario.read_csv('ReedsShepp_22.59_2k', set_path=True)
-TestScenario.plot_scenario()
+#TestScenario.plot_scenario()
