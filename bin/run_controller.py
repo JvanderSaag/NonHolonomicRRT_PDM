@@ -5,6 +5,7 @@ import math
 from bin import Controller
 from bin import draw
 
+
 #from test_scenario1 import simple_Scenario
 
 def run_sim(simple_Scenario, name):
@@ -64,10 +65,12 @@ def run_sim(simple_Scenario, name):
 
         if simple_Scenario.start is not None and simple_Scenario.goal is not None:
             if simple_Scenario.vehicle_length != 0 and simple_Scenario.vehicle_width != 0: # If the vehicle size has been set, draw start and goal as vehicle
-                plt.gca().add_patch(matplotlib.patches.Rectangle((simple_Scenario.start[0].x - Controller.P.RB, simple_Scenario.start[0].y - simple_Scenario.vehicle_width / 2),
-                                                            simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.start[1], color='red', alpha=0.8, label='Start', rotation_point='center'))
-                plt.gca().add_patch(matplotlib.patches.Rectangle((simple_Scenario.goal[0].x - Controller.P.RB, simple_Scenario.goal[0].y - simple_Scenario.vehicle_width / 2), 
-                                                            simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.goal[1], color='green', alpha=0.8, label='Goal', rotation_point='center'))
+              #  plt.gca().add_patch(matplotlib.patches.Rectangle((simple_Scenario.start[0].x - Controller.P.RB, simple_Scenario.start[0].y - simple_Scenario.vehicle_width / 2),
+              #                                              simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.start[1], color='red', alpha=0.8, label='Start', rotation_point='center'))
+                plt.gca().add_patch(matplotlib.patches.Rectangle((simple_Scenario.start[0].x + simple_Scenario.vehicle_width / 2, simple_Scenario.start[0].y - Controller.P.RB),
+                                                            simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.start[1], color='red', alpha=0.8, label='Start', rotation_point='xy'))
+                plt.gca().add_patch(matplotlib.patches.Rectangle((simple_Scenario.goal[0].x + simple_Scenario.vehicle_width / 2, simple_Scenario.goal[0].y - Controller.P.RB), 
+                                                            simple_Scenario.vehicle_length, simple_Scenario.vehicle_width, simple_Scenario.goal[1], color='green', alpha=0.8, label='Goal', rotation_point='xy'))
             else: # Draw start and goal as points
                 plt.scatter(simple_Scenario.start[0].x, simple_Scenario.start[0].y, s=50, c='g', marker='o', label='Start')
                 plt.scatter(simple_Scenario.goal[0].x, simple_Scenario.goal[0].y, s=60, c='r', marker='*', label='Goal')
