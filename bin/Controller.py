@@ -3,8 +3,8 @@ author: huiming zhou (https://github.com/zhm-real)
 Modified by Ayush Kulshreshtha
 '''
 
-import os
-import sys
+#import os
+#import sys
 import math
 import cvxpy
 import numpy as np
@@ -18,12 +18,12 @@ class P:
     T = 6  # finite time horizon length
 
     # MPC config
-    Q = np.diag([3.5, 3.5, 1.0, 1.0])  # penalty for states
-    Qf = np.diag([5.0, 5.0, 5.0, 5.0])  # penalty for end state
-    R = np.diag([0.01, 0.1])  # penalty for inputs
+    Q = np.diag([3.0, 3.0, 2.0, 3.0])  # penalty for states
+    Qf = np.diag([3.0, 3.0, 1.0, 1.0])  # penalty for end state
+    R = np.diag([0.01, 0.2])  # penalty for inputs
     Rd = np.diag([0.01, 0.1])  # penalty for change of inputs
 
-    dist_stop = 0.15  # stop permitted when dist to goal < dist_stop
+    dist_stop = 0.015  # stop permitted when dist to goal < dist_stop
     speed_stop = 0.5 / 3.6  # stop permitted when speed < speed_stop
     time_max = 500.0  # max simulation time
     iter_max = 5  # max iteration
@@ -42,8 +42,8 @@ class P:
     TR = 0.44  # [m] Tyre radius
     TW = 0.7  # [m] Tyre width
 
-    steer_max = np.deg2rad(45.0)  # max steering angle [rad]
-    steer_change_max = np.deg2rad(30.0)  # maximum steering speed [rad/s]
+    steer_max = np.deg2rad(55.0)  # max steering angle [rad]
+    steer_change_max = np.deg2rad(40.0)  # maximum steering speed [rad/s]
     speed_max = 55.0 / 3.6  # maximum speed [m/s]
     speed_min = -20.0 / 3.6  # minimum speed [m/s]
     acceleration_max = 1.0  # maximum acceleration [m/s2]
