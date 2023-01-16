@@ -65,8 +65,6 @@ $ python -m ipykernel install --user --name=python3
 
 $ conda activate group13_pdm_project
 ```
-- Execute any of the provided test scenarios or follow the instruction mentioned in the next section. 
-- Execute main.py to run the MPC controller on any of the saved paths in the `Saved_scenarios` folder. This script can be modified to execute any of the saved scenarios. Just change the name of the scenario in the main.py to the one you wish to run.
 
 
 # Usage
@@ -141,6 +139,20 @@ To return the coordinates of the path that are saved in the csv file, the follow
 This returns a list of tuples, where each tuple represents (x, y, yaw, reversing). x and y indicate the coordinates of the point, where (x, y) = (0, 0) is the bottom left corner. The yaw is positive counter-clockwise on the domain [0, 360] degrees. The boolean 'reversing' indicates whether the car is moving backwards at that point. This is only relevant when using Reeds-Schepp path connectors.
 
 
+## Running the Simulation
+
+- Head to main.py and chose the scenario file to be simulated. The scenario keyword needs to be passed as the import module to line 14 and to the run_sim function in line 16. 
+- Execute main.py. The animate keyword in the run_sim function can be set to False incase you do not want to render the simulation, but only
+ want the plot of the planned and simulated trajectories.
+
+To run a scenario based on a Dubins path, these additional steps** need to be followed:
+
+- Head to the Controller.py file in the bin folder.
+- Uncomment lines 25 and 26. 
+
+**To get the controller to track the Dubins path correctly, we had to modify the penalties on the states and the end state (Matricies Q and Qf) to reduce the penalty on yaw. Otherwise, as the yaw jumps quadrants, the controller fails to turn in the correct direction. This is a known bug in our code and future work would involve correcting this.
+
+
 # Example results
 
 Planned paths:
@@ -169,3 +181,4 @@ MPC and draw functions implemented using existing code authored by Huming Zhou. 
 ## Future work
 - Expanding RRT further in order to provide more options aswell as optimize it's efficiency. 
 - Modifying the vehicles collistion calculation to be more realistic. When checking collision during RRT a circle is drawn around the vehicle. This is a known limitation that makes it impossible to have cars close by even when no collision is happening. 
+- Correcting the known bugs in MPC implementation to improve tracking.
