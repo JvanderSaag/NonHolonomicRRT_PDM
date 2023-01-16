@@ -19,9 +19,12 @@ class P:
 
     # MPC config
     Q = np.diag([3.0, 3.0, 2.0, 3.0])  # penalty for states
-    #Q = np.diag([7.0, 7.0, 1.5, 0.10]) 
     Qf = np.diag([3.0, 3.0, 1.0, 1.0])  # penalty for end state
+
+    #Uncomment the Lines below if using Dubins 
+    #Q = np.diag([7.0, 7.0, 1.5, 0.10]) 
     #Qf = np.diag([3.0, 3.0, 1.0, 0.10])
+
     R = np.diag([0.01, 0.2])  # penalty for inputs
     Rd = np.diag([0.01, 0.1])  # penalty for change of inputs
 
