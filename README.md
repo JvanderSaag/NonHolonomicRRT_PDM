@@ -1,3 +1,6 @@
+https://github.com/JvanderSaag/NonHolonomicRRT_PDM
+
+
 # NonHolonomicRRT_PDM
 Implementation of a complete Trajectory planning & tracking pipeline for a non-holonomic ground vehicle which utilises a path planner based on RRT* algorithm and an MPC controller. Created for the course Planning &amp; Decision Making (RO47005) at the Technische Universiteit Delft.
 This project uses a modified version of RRT* with Reeds Shepp and Dubins connectors.
