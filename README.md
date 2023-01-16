@@ -140,6 +140,23 @@ To return the coordinates of the path that are saved in the csv file, the follow
 
 This returns a list of tuples, where each tuple represents (x, y, yaw, reversing). x and y indicate the coordinates of the point, where (x, y) = (0, 0) is the bottom left corner. The yaw is positive counter-clockwise on the domain [0, 360] degrees. The boolean 'reversing' indicates whether the car is moving backwards at that point. This is only relevant when using Reeds-Schepp path connectors.
 
+
+# Example results
+
+Planned paths:
+
+![ParallelParking_Scenario_ReedShepp](https://user-images.githubusercontent.com/65740720/212574608-2ccd2a64-06f0-4685-9c92-5a33c0b463b4.png)
+
+
+![Parking_Scenario_ReedsShepp](https://user-images.githubusercontent.com/65740720/212574616-371f7b1e-991c-42d9-a8f0-436e97891c2f.png)
+
+Simulated trajectory:
+
+https://user-images.githubusercontent.com/65740720/212574578-c381cac7-e9ac-45f4-9c58-c2c701d505f2.mp4
+
+
+
+
 # References
 
 Reeds Shepp curves planning implemented using existing code authored by Atsushi Sakai. The code was modified in order to output paths compatible with our implementation of RRT, and also features were added in order to increase the flexibility of the code. (https://github.com/AtsushiSakai/PythonRobotics/blob/master/PathPlanning/ReedsSheppPath/reeds_shepp_path_planning.py)
